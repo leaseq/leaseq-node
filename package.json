@@ -13,7 +13,7 @@
     "test": "jest --env=jsdom"
   },
   "author": "LeaseQ <admin@leaseq.com> (https://leaseq.com)",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "dependencies": {
     "axios": "^0.18.0"
   },
