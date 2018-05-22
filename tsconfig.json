@@ -56,6 +56,8 @@
   },
   "exclude": [
       "node_modules",
+      "__tests__",
+      "setupTests.ts",
       "build",
       "coverage"
   ]

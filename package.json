@@ -1,6 +1,6 @@
 {
   "name": "leaseq-node",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "Submit credit applications to LeaseQ",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -13,16 +13,15 @@
     "test": "jest --env=jsdom"
   },
   "author": "LeaseQ <admin@leaseq.com> (https://leaseq.com)",
-  "license": "UNLICENSED",
-  "private": true,
+  "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.0",
-    "typescript": "^2.8.3"
+    "axios": "^0.18.0"
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "axios-mock-adapter": "^1.15.0",
-    "ts-jest": "^22.4.6"
+    "ts-jest": "^22.4.6",
+    "typescript": "^2.8.3"
   },
   "jest": {
     "moduleFileExtensions": [

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 
-import defaults from './defaults';
+import defaults from 'defaults';
 
 export class LeaseQ implements LeaseQ.SDK {
 
