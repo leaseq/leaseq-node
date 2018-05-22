@@ -6,113 +6,19 @@ const defaults = {
     password: ``,
 };
 
-export type Status = "New" | "App Widget Lead" | "Decline" | "App Submitted" | "Approved" | "Contract Out" | "Contract In" | "Prefunding Released" | "PO Issued" | "Lost" | "Funded";
-
-type FullApplication = Application & {
-    is_full_application: true;
-    guarantors: Guarantor[];
-}
-
-type PartialApplication = Partial<Application> & {
-    is_full_application?: false;
-}
-
-export type Application = {
-
-    /* The application type: `"business"`, `"corporate"`, `"nonprofit"`,
-    or `"municipal"`. */
-    type: "business" | "corporate" | "nonprofit" | "municipal";
-
-    /* A flag which indicates this application should be validated as a complete
-    application that requires no additional information from guarantors */
-    is_full_application?: boolean;
-
-    /* The total amount */
-    total_amount: number;
-
-    /* An optional identifier that can be set to correlate LeaseQ
-    applications with entities in other systems. This field is
-    searchable in the LeaseQ dashboard */
-    remote_id?: string;
-
-    products?: {
-        /* The product code */
-        product_code: string;
-        /* The product name */
-        name: string;
-        /* The product description */
-        description?: string;
-        /* The product quantity */
-        quantity?: number;
-        /* The product price */
-        price: number;
-    }[];
-
-    billing?: {
-        /* The charge / line item */
-        charge: string;
-        /* The description of the charge */
-        description?: string;
-        /* The price */
-        price: number;
-    }[];
-
-    company: {
-        /* The name of the company */
-        name: string;
-        /* The name under which the company does business */
-        dba?: string;
-        /* The phone number for the company headquarters */
-        phone: string;
-        /* The company headquarters street address */
-        address: string;
-        /* The city where the company headquarters is located */
-        city: string;
-        /* The state/prov where the company headquarters is located */
-        state: string;
-        /* The zip/postal of the company headquarters */
-        zip: string;
-        /* The Employer Identification Number */
-        ein?: string;
-        /* The number of years in business */
-        years_in_business: number;
-    };
-
-    guarantors: Guarantor[];
-
-    /* Indicates whether the customer owns the property where the
-    equipment is being installed */
-    owns_install_location: boolean;
-
-};
-
-export type Guarantor = {
-    /* The guarantor's first name */
-    first_name: string;
-    /* The guarantor's last name */
-    last_name: string;
-    /* The guarantor's email address */
-    email?: string;
-    /* The guarantor's phone number */
-    phone?: string;
-    /* The guarantor's street address */
-    address?: string;
-    /* The guarantor's city */
-    city?: string;
-    /* The guarantor's state/prov */
-    state?: string;
-    /* The guarantor's zip/postal */
-    zip?: string;
-    /* (encrypted) The guarantor's Social Security Number. See
-    [Encryption of Sensitive
-    Data](https://github.com/leaseq/api-docs/blob/master/encryption.md)
-    for information on encrypting sensitive fields like SSN.*/
-    ssn: string;
-    /* The percentage owned */
-    percentage_owned?: string;
-};
 
 export interface LeaseQ {
+
+    (config: {
+        email: string;
+        password: string;
+        dealer_id: string;
+        base_url?: string;
+    }): Promise<{
+        auth_token: string;
+        auth_scheme: string;
+        expires: string;
+    }>;
 
     application: {
 
@@ -343,217 +249,196 @@ export interface LeaseQ {
 
 }
 
+export type Status = "New" | "App Widget Lead" | "Decline" | "App Submitted" | "Approved" | "Contract Out" | "Contract In" | "Prefunding Released" | "PO Issued" | "Lost" | "Funded";
 
-export class LegacyLeaseQ implements LeaseQ.SDK {
+type FullApplication = Application & {
+    is_full_application: true;
+    guarantors: Guarantor[];
+}
 
-    private readonly axios_config: AxiosRequestConfig;
+type PartialApplication = Partial<Application> & {
+    is_full_application?: false;
+}
 
-    /**
-     * @param {LeaseQ.Config} config 
-     *  - `auth_token` *string* - the default authentication token. Useful if
-     *    you have a static API key.
-     *  - `environment` *string* - select a baseURL for API requests.
-     *    "Development" is selected by default. Possible values: "development",
-     *    "testing", or "production".
-     */
-    constructor(config?: LeaseQ.Config) {
+export type Application = {
 
-        this.axios_config = {
-            headers: {}
-        };
+    /* The application type: `"business"`, `"corporate"`, `"nonprofit"`,
+    or `"municipal"`. */
+    type: "business" | "corporate" | "nonprofit" | "municipal";
 
-        /* I would love to just set axios (custom instance
-           defaults)[https://github.com/axios/axios#custom-instance-defaults],
-           but that feature doesn't seem to work properly. For now we have to
-           work around this by keeping track of our own config.
-           
-           WARNING: axios will fail if `Authorization` is `undefined`. The key
-           either needs to have a value, or not exist at all. */
-        if (config && config.auth_token) {
-            this.axios_config.headers.Authorization = LeaseQ.toAuthorization(config.auth_token);
-        }
+    /* A flag which indicates this application should be validated as a complete
+    application that requires no additional information from guarantors */
+    is_full_application?: boolean;
 
-        if (config && config.baseURL) {
-            this.axios_config.baseURL = config.baseURL;
-        } else if (defaults.base_url) {
-            this.axios_config.baseURL = defaults.base_url;
-        } else {
-            throw new Error(`LeaseQ API Error: base URL is undefined. Either
-            pass it into the constructor (new LeaseQ({ baseURL: '...' })), or
-            set an environment variable named REACT_APP_LEASEQ_BASE_URL.`);
-        }
+    /* The total amount */
+    total_amount: number;
 
-    }
+    /* An optional identifier that can be set to correlate LeaseQ
+    applications with entities in other systems. This field is
+    searchable in the LeaseQ dashboard */
+    remote_id?: string;
 
-    /**
-     * Convert an authentication token into an Authorization header
-     *
-     * @param {string} auth_token an authentication token. If you don't have
-     * one, get it from `login()`.
-     * @param {string} [auth_scheme] an authentication scheme (e.g. 'LeaseQ').
-     * 'LeaseQ' is the only supported scheme so far.  
-     * @return {string} an authorization header (e.g. "Authorization LeaseQ
-     * $Auth_Token")
-     */
-    static readonly toAuthorization = (auth_token?: string, auth_scheme = 'LeaseQ') =>
+    products?: {
+        /* The product code */
+        product_code: string;
+        /* The product name */
+        name: string;
+        /* The product description */
+        description?: string;
+        /* The product quantity */
+        quantity?: number;
+        /* The product price */
+        price: number;
+    }[];
+
+    billing?: {
+        /* The charge / line item */
+        charge: string;
+        /* The description of the charge */
+        description?: string;
+        /* The price */
+        price: number;
+    }[];
+
+    company: {
+        /* The name of the company */
+        name: string;
+        /* The name under which the company does business */
+        dba?: string;
+        /* The phone number for the company headquarters */
+        phone: string;
+        /* The company headquarters street address */
+        address: string;
+        /* The city where the company headquarters is located */
+        city: string;
+        /* The state/prov where the company headquarters is located */
+        state: string;
+        /* The zip/postal of the company headquarters */
+        zip: string;
+        /* The Employer Identification Number */
+        ein?: string;
+        /* The number of years in business */
+        years_in_business: number;
+    };
+
+    guarantors: Guarantor[];
+
+    /* Indicates whether the customer owns the property where the
+    equipment is being installed */
+    owns_install_location: boolean;
+
+};
+
+export type Guarantor = {
+    /* The guarantor's first name */
+    first_name: string;
+    /* The guarantor's last name */
+    last_name: string;
+    /* The guarantor's email address */
+    email?: string;
+    /* The guarantor's phone number */
+    phone?: string;
+    /* The guarantor's street address */
+    address?: string;
+    /* The guarantor's city */
+    city?: string;
+    /* The guarantor's state/prov */
+    state?: string;
+    /* The guarantor's zip/postal */
+    zip?: string;
+    /* (encrypted) The guarantor's Social Security Number. See
+    [Encryption of Sensitive
+    Data](https://github.com/leaseq/api-docs/blob/master/encryption.md)
+    for information on encrypting sensitive fields like SSN.*/
+    ssn: string;
+    /* The percentage owned */
+    percentage_owned?: string;
+};
+
+/**
+ * Convert an authentication token into an Authorization header
+ *
+ * @param auth_token an authentication token. If you don't have
+ * one, get it from `login()`.
+ * @param [auth_scheme] an authentication scheme (e.g. 'LeaseQ').
+ * 'LeaseQ' is the only supported scheme so far.  
+ * @return an authorization header (e.g. "Authorization LeaseQ
+ * $Auth_Token")
+ */
+const toAuthorization = (auth_token?: string, auth_scheme = 'LeaseQ') =>
         auth_token ? [auth_scheme, auth_token].join(' ') : undefined
 
-    /**
-     * Convert axios response to regular promises
-     *
-     * @param {AxiosResponse} response
-     * @return {Promise} a promise that resolves to a plain response body
-     * without extra axios properties
-     */
-    private static readonly toPromise = async (response: AxiosResponse) => Promise.resolve(response.data);
+/**
+ * Convert axios response to regular promises
+ *
+ * @param response
+ * @return a promise that resolves to a plain response body
+ * without extra axios properties
+ */
+const toPromise = async (response: AxiosResponse) => Promise.resolve(response.data);
 
-    /**
-     * Authenticate the user.
-     *
-     * @param {LeaseQ.LoginRequest} credentials
-     *  - `email` *string* – Your email address
-     *  - `password` *string* – Your password
-     *  - `tenant_id` *string* – Your tenant or dealer ID
-     *
-     * @return {Promise<LeaseQ.LoginResponse>}
-     *  - `auth_token` *string* – The authentication token
-     *  - `auth_scheme` *string* – The authentication scheme
-     *  - `expires` *string* – The expiration date/time of the token
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/login/post.md
-     */
-    login: LeaseQ.Login = async (credentials) =>
-        axios.post<LeaseQ.LoginResponse>(`/login`, credentials, this.axios_config)
-            .then(LeaseQ.toPromise)
-            .then(async response => {
-                this.axios_config.headers.Authorization = LeaseQ.toAuthorization(response.auth_token);
-                return Promise.resolve(response);
-            })
+/**
+ * Authenticate the user
+ * 
+ * @param credentials
+ * @return
+ */
+const login: LeaseQ["login"] = async (credentials) =>
+    /* Don't send the authentication token */
+    axios.post(`/login`, credentials, { baseURL: axios.defaults.baseURL })
+        .then(toPromise)
+        .then(async response => {
+            axios.defaults.headers.Authorization = toAuthorization(response.auth_token);
+            return Promise.resolve(response);
+        });
 
-    /**
-     * Create a new credit application
-     *
-     * @param {LeaseQ.ApplyRequest} application
-     *  - `type` *string* – The application type: "business", "consumer",
-     *    "corporate", "nonprofit", or "municipal".
-     *  - `total_amount` *number* – The total amount 
-     *  - `remote_id` *string* – An optional identifier that can be set to correlate
-     *    LeaseQ applications with entities in other systems. This field is
-     *    searchable in the LeaseQ dashboard
-     *  - `products` *LeaseQ.Product[]* – An array of products. See the definition of *LeaseQ.Product*.
-     *  - `equipment` *LeaseQ.Equipment* – Equipment information. See the definition of *LeaseQ.Equipment*.
-     *  - `billing` *LeaseQ.Charge[]* – An array of line items. See the definition of *LeaseQ.Charge*.
-     *  - `company` *LeaseQ.Company* – Company information. See the definition of *LeaseQ.Company*.
-     *  - `guarantors` *LeaseQ.Guarantor[]* – An array of guarantors. See the definition of *LeaseQ.Guarantor*.
-     *
-     * @return {Promise<LeaseQ.ApplyResponse>}
-     *  - `app_id` *string* – The ID of the new application
-     *  - `status` *string* – The status of the new application: "Funded",
-     *    "Lost", "PO Issued", "Prefunding Released", "Contract In",
-     *    "Contract Out", "Approved", "App Submitted", "Decline", "App
-     *    Widget" "Lead", or "New".
-     *
-     * @see https://github.com/leaseq/api-docs/blob/master/login/post.md
-     */
-    submitApplication: LeaseQ.SubmitApplication = async (application) => {
-        return axios.post(`/applications`, application, this.axios_config)
-            .then(LeaseQ.toPromise);
-    }
+const LeaseQ: LeaseQ = async (config) => {
+    axios.defaults.baseURL = config.base_url || defaults.base_url;
+    return login({
+        email: config.email,
+        password: config.password,
+        dealer_id: config.dealer_id
+    });
+};
 
-    /**
-     * Get a credit application
-     * 
-     * @param {string} app_id
-     * @return {Promise<LeaseQ.GetApplicationResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/get.md
-     */
-    getApplication: LeaseQ.GetApplication = async (app_id) =>
-        axios.get(`/applications/${encodeURIComponent(app_id)}`, this.axios_config)
-            .then(LeaseQ.toPromise)
+LeaseQ.login = login;
 
-    /**
-     * Update an application
-     * 
-     * @param {string} app_id 
-     * @param {LeaseQ.UpdateApplicationRequest} application 
-     * - `total_amount` *number* – The total amount 
-     * - `status` *string* – The status of the new application: "Funded",
-     *    "Lost", "PO Issued", "Prefunding Released", "Contract In",
-     *    "Contract Out", "Approved", "App Submitted", "Decline", "App
-     *    Widget" "Lead", or "New".
-     * - `lost_reason` *string* - The reason if `status` is "Lost"
-     * 
-     * @return {Promise<LeaseQ.UpdateApplicationResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/patch.md 
-     */
-    updateApplication: LeaseQ.UpdateApplication = async (app_id, application) =>
-        axios.patch(`/applications/${encodeURIComponent(app_id)}`, application, this.axios_config)
-            .then(LeaseQ.toPromise)
+LeaseQ.lender = {
+    rates: async () =>
+        axios.get(`/lenders/rates`)
+            .then(toPromise)
+};
 
-    /**
-     * Replace an application
-     * 
-     * @param {string} app_id 
-     * @param {LeaseQ.ReplaceApplicationRequest} application
-     * @return {Promise<LeaseQ.ReplaceApplicationResponse}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/put.md
-     */
-    replaceApplication: LeaseQ.ReplaceApplication = async (app_id, application) =>
-        axios.put(`/applications/${encodeURIComponent(app_id)}`, application, this.axios_config)
-            .then(LeaseQ.toPromise)
+LeaseQ.application = {
 
-    /**
-     * Electronically signs an application
-     * 
-     * @param {string} app_id
-     * @param {LeaseQ.SignApplicationRequest} signature
-     * @return {Promise<LeaseQ.SignApplicationResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/sign.md
-     */
-    signApplication: LeaseQ.SignApplication = async (app_id, signature) =>
-        axios.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature, this.axios_config)
-            .then(LeaseQ.toPromise)
+    submit: async (application) =>
+        axios.post(`/applications`, application)
+        .then(toPromise),
 
-    /**
-     * Get estimated financing rates
-     * 
-     * @return {Promise<Leaseq.GetRatesResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
-     */
-    getRates: LeaseQ.GetRates = async () =>
-        axios.get(`/lenders/rates`, this.axios_config)
-            .then(LeaseQ.toPromise)
+    get: async (app_id) =>
+        axios.get(`/applications/${encodeURIComponent(app_id)}`)
+            .then(toPromise),
 
-    /**
-     * Get quotes for an application
-     * 
-     * @param {string} app_id
-     * @return {Promise<LeaseQ.GetQuotesResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/quotes/get.md
-     */
-    getQuotes: LeaseQ.GetQuotes = async (app_id) =>
-        axios.get(`/applications/${encodeURIComponent(app_id)}/quotes`, this.axios_config)
-            .then(LeaseQ.toPromise)
+    update: async (app_id, application) =>
+        axios.patch(`/applications/${encodeURIComponent(app_id)}`, application)
+            .then(toPromise),
 
-    /**
-     * Upload a document
-     * 
-     * @param {string} app_id
-     * @param {LeaseQ.UploadDocumentRequest} document
-     * @return {Promise<LeaseQ.UploadDocumentResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/documents/post.md
-     */
-    uploadDocument: LeaseQ.UploadDocument = async (app_id, document) =>
-        axios.post(`/applications/${encodeURIComponent(app_id)}/documents`, document, this.axios_config)
-            .then(LeaseQ.toPromise)
+    replace: async (app_id, application) =>
+        axios.put(`/applications/${encodeURIComponent(app_id)}`, application)
+            .then(toPromise),
 
-}
+    sign: async (app_id, signature) =>
+        axios.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature)
+            .then(toPromise),
+    
+    quotes: async (app_id) =>
+        axios.get(`/applications/${encodeURIComponent(app_id)}/quotes`)
+            .then(toPromise),
+
+    upload: async (app_id, document) =>
+        axios.post(`/applications/${encodeURIComponent(app_id)}/documents`, document)
+            .then(toPromise)
+
+};
 
 export default LeaseQ;
