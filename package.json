@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest --watch --env=jsdom"
+    "test": "jest --watch --env=node"
   },
   "author": "LeaseQ <admin@leaseq.com> (https://leaseq.com)",
   "license": "UNLICENSED",
@@ -32,7 +32,6 @@
       "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "/__tests__/.*\\.(ts|js)$",
-    "setupTestFrameworkScriptFile": "<rootDir>/setupTests.ts",
     "modulePathIgnorePatterns": ["data.ts"]
   }
 }

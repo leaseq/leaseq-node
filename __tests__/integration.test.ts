@@ -1,29 +1,26 @@
-import LeaseQ from '../lib';
-import * as data from './data';
 import defaults from '../lib/defaults';
+import { LeaseQ } from '../lib';
+import * as data from './data';
+
+const unknown_id = '00000000-0000-0000-0000-000000000000';
 
 let unauthenticatedApi: LeaseQ;
 let api: LeaseQ;
-const unknown_id = '00000000-0000-0000-0000-000000000000';
 
 beforeAll(async () => {
-    unauthenticatedApi = new LeaseQ();
-    api = new LeaseQ();
-    if (!defaults.email || !defaults.password) {
-        throw new Error(`REACT_APP_LEASEQ_EMAIL or REACT_APP_LEASEQ_PASSWORD
-        are not defined. Make sure they are defined in your .env or .env.local
-        files`);
-    }
+    unauthenticatedApi = LeaseQ();
+    api = LeaseQ();
+    /* TODO: load environment variables */
     await api.login({
-        email: defaults.email,
-        password: defaults.password
+        email: '',
+        password: '',
     });
 });
 
 describe('lenders', () => {
 
     it('can get rates', async () => {
-        const response = await api.getRates();
+        const response = await api.rates();
         expect(response).toBeDefined();
         expect(response.credit_tiers).toBeDefined();
         expect(response.credit_tiers.length).toBeGreaterThan(0);
@@ -32,7 +29,7 @@ describe('lenders', () => {
         expect(response.credit_tiers[0].terms.length).toBeGreaterThan(0);
 
         // ensure the call requires authantication
-        await expect(unauthenticatedApi.getRates())
+        await expect(unauthenticatedApi.rates())
             .rejects
             .toThrowError('Request failed with status code 401');
     });
@@ -45,7 +42,7 @@ describe('applications', () => {
     let submitAppResponse: LeaseQ.SubmitApplicationResponse;
 
     beforeAll(async () => {
-        submitAppResponse = await api.submitApplication(data.submit_full_application_request);
+        submitAppResponse = await api.application.submit(data.submit_full_application_request);
         expect(submitAppResponse).toBeDefined();
         expect(submitAppResponse.app_id).toBeDefined();
         expect(submitAppResponse.app_id.length).toBeGreaterThan(0);
@@ -61,44 +58,44 @@ describe('applications', () => {
         expect(submitAppResponse.status).toEqual('Lead');
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.submitApplication(data.submit_full_application_request))
+        await expect(unauthenticatedApi.application.submit(data.submit_full_application_request))
             .rejects
             .toThrowError('Request failed with status code 401');
     });
 
     it('can submit partial applications', async () => {
         let response: LeaseQ.SubmitApplicationResponse;
-        response = await api.submitApplication(data.submit_partial_application_request);
+        response = await api.application.submit(data.submit_partial_application_request);
         expect(response).toBeDefined();
         expect(response.app_id).toBeDefined();
         expect(response.app_id.length).toBeGreaterThan(0);
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.submitApplication(data.submit_partial_application_request))
+        await expect(unauthenticatedApi.application.submit(data.submit_partial_application_request))
             .rejects
             .toThrowError('Request failed with status code 401');
     });
 
     it('can replace application', async () => {
-        const response = await api.replaceApplication(app_id, data.replace_application_request);
+        const response = await api.application.replace(app_id, data.replace_application_request);
         expect(response).toBeDefined();
         expect(response.app_id).toBeDefined();
         expect(response.app_id.length).toBeGreaterThan(0);
         expect(response.status).toEqual('Lead');
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.replaceApplication(app_id, data.replace_application_request))
+        await expect(unauthenticatedApi.application.replace(app_id, data.replace_application_request))
             .rejects
             .toThrowError('Request failed with status code 401');
 
         // ensure the call fails if not found
-        await expect(api.replaceApplication(unknown_id, data.replace_application_request))
+        await expect(api.application.replace(unknown_id, data.replace_application_request))
             .rejects
             .toThrowError('Request failed with status code 404');
     });
 
     it('can get application', async () => {
-        const response = await api.getApplication(app_id);
+        const response = await api.application.get(app_id);
         expect(response).toBeDefined();
         expect(response.app_id).toBeDefined();
         expect(response.status).toBeDefined();
@@ -108,18 +105,18 @@ describe('applications', () => {
         expect(response.updated_date).toBeDefined();
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.getApplication(app_id))
+        await expect(unauthenticatedApi.application.get(app_id))
             .rejects
             .toThrowError('Request failed with status code 401');
 
         // ensure the call fails if not found
-        await expect(api.getApplication(unknown_id))
+        await expect(api.application.get(unknown_id))
             .rejects
             .toThrowError('Request failed with status code 404');
     });
 
     it('can get application quotes', async () => {
-        const quotesResponse = await api.getQuotes(app_id);
+        const quotesResponse = await api.application.quotes(app_id);
         expect(quotesResponse).toBeDefined();
         expect(quotesResponse.quotes).toBeDefined();
         expect(quotesResponse.quotes.length).toBeGreaterThan(0);
@@ -135,18 +132,18 @@ describe('applications', () => {
         expect(selectedOption.term).toBeGreaterThan(0);
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.getQuotes(app_id))
+        await expect(unauthenticatedApi.application.quotes(app_id))
             .rejects
             .toThrowError('Request failed with status code 401');
 
         // ensure the call fails if not found
-        await expect(api.getQuotes(unknown_id))
+        await expect(api.application.quotes(unknown_id))
             .rejects
             .toThrowError('Request failed with status code 404');
     });
 
     it('can sign application', async () => {
-        const quotesResponse = await api.getQuotes(app_id);
+        const quotesResponse = await api.application.quotes(app_id);
         expect(quotesResponse).toBeDefined();
         expect(quotesResponse.quotes).toBeDefined();
         expect(quotesResponse.quotes.length).toBeGreaterThan(0);
@@ -155,7 +152,7 @@ describe('applications', () => {
         expect(selectedQuote.options).toBeDefined();
         expect(selectedQuote.options.length).toBeGreaterThan(0);
 
-        const signRequest: LeaseQ.SignApplicationRequest = {
+        const signRequest = {
             selected_quote: selectedQuote.quote_id,
             selected_term: selectedQuote.options[0].term,
             name: 'Joe Borrower',
@@ -163,64 +160,64 @@ describe('applications', () => {
             title: 'CFO'
         };
 
-        const response = await api.signApplication(app_id, signRequest);
+        const response = await api.application.sign(app_id, signRequest);
         expect(response).toHaveProperty('signature');
         expect(response).toHaveProperty('date');
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.signApplication(app_id, signRequest))
+        await expect(unauthenticatedApi.application.sign(app_id, signRequest))
             .rejects
             .toThrowError('Request failed with status code 401');
 
         // ensure the call fails if not found
-        await expect(api.signApplication(unknown_id, signRequest))
+        await expect(api.application.sign(unknown_id, signRequest))
             .rejects
             .toThrowError('Request failed with status code 404');
     });
 
     it('can change application status', async () => {
-        const patchRequest: LeaseQ.UpdateApplicationRequest = {
+        const patchRequest = {
             status: 'Lost',
             lost_reason: 'Lost to cash'
         };
 
-        await api.updateApplication(app_id, patchRequest);
+        await api.application.update(app_id, patchRequest);
 
-        const response = await api.getApplication(app_id);
+        const response = await api.application.get(app_id);
         expect(response).toBeDefined();
         expect(response.status).toEqual('Lost');
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.updateApplication(app_id, patchRequest))
+        await expect(unauthenticatedApi.application.update(app_id, patchRequest))
             .rejects
             .toThrowError('Request failed with status code 401');
 
         // ensure the call fails if not found
-        await expect(api.updateApplication(unknown_id, patchRequest))
+        await expect(api.application.update(unknown_id, patchRequest))
             .rejects
             .toThrowError('Request failed with status code 404');
     });
 
     it('can change application amount', async () => {
         const newAmount = 50000;
-        await api.updateApplication(app_id, {
+        await api.application.update(app_id, {
             total_amount: newAmount
         });
 
         // a change in scope should cause an application to go to "AppIn" status
-        const response = await api.getApplication(app_id);
+        const response = await api.application.get(app_id);
         expect(response).toBeDefined();
         expect(response.status).toEqual('AppIn');
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.updateApplication(app_id, {
+        await expect(unauthenticatedApi.application.update(app_id, {
             total_amount: 10000
         }))
             .rejects
             .toThrowError('Request failed with status code 401');
 
         // ensure the call fails if not found
-        await expect(api.updateApplication(unknown_id, {
+        await expect(api.application.update(unknown_id, {
             total_amount: 10000
         }))
             .rejects
@@ -228,18 +225,18 @@ describe('applications', () => {
     });
 
     it('can upload application documents', async () => {
-        const response = await api.uploadDocument(app_id, data.upload_document_request);
+        const response = await api.application.upload(app_id, data.upload_document_request);
         expect(response).toBeDefined();
         expect(response.document_id).toBeDefined();
         expect(response.document_id.length).toBeGreaterThan(0);
 
         // ensure the call requres authantication
-        await expect(unauthenticatedApi.uploadDocument(app_id, data.upload_document_request))
+        await expect(unauthenticatedApi.application.upload(app_id, data.upload_document_request))
             .rejects
             .toThrowError('Request failed with status code 401');
 
         // ensure the call fails if not found
-        await expect(api.uploadDocument(unknown_id, data.upload_document_request))
+        await expect(api.application.upload(unknown_id, data.upload_document_request))
             .rejects
             .toThrowError('Request failed with status code 404');
     });

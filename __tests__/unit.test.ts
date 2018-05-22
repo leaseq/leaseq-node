@@ -4,9 +4,11 @@ import LeaseQ from '../lib';
 import * as data from './data';
 
 let mock: MockAdapter;
+let api: LeaseQ;
 
 beforeAll(async () => {
-    mock = new MockAdapter(axios);
+    api = LeaseQ();
+    mock = new MockAdapter(api.network);
     /* Don't log in because we're using a mock */
 });
 
@@ -39,7 +41,7 @@ describe('lenders', () => {
         const response = data.get_rates_response;
         mock.onGet('/lenders/rates')
             .reply(200, response);
-        expect(await LeaseQ.rates())
+        expect(await api.rates())
             .toEqual(response);
     });
 
@@ -54,7 +56,7 @@ describe('login', () => {
         mock.onPost('/login')
             .reply(expectRequestToMatch(request, response));
 
-        expect(await LeaseQ.login(request)).toEqual(response);
+        expect(await api.login(request)).toEqual(response);
 
         mock.onAny(/.*/)
             .reply(config => {
@@ -64,7 +66,7 @@ describe('login', () => {
             });
 
         // it doesn't matter which method we call 
-        await LeaseQ.application.get(app_id);
+        await api.application.get(app_id);
     });
 
 });
@@ -76,7 +78,7 @@ describe('applications', () => {
         const response = data.submit_application_response;
         mock.onPost('/applications')
             .reply(expectRequestToMatch(request, response, 201));
-        expect(await LeaseQ.application.submit(request))
+        expect(await api.application.submit(request))
             .toEqual(response);
     });
 
@@ -85,7 +87,7 @@ describe('applications', () => {
         const response = data.get_application_response;
         mock.onGet(`/applications/${app_id}`)
             .reply(200, response);
-        expect(await LeaseQ.application.get(app_id))
+        expect(await api.application.get(app_id))
             .toEqual(response);
     });
 
@@ -95,7 +97,7 @@ describe('applications', () => {
         const response = undefined;
         mock.onPatch(`/applications/${app_id}`)
             .reply(expectRequestToMatch(request, response));
-        expect(await LeaseQ.application.update(app_id, request))
+        expect(await api.application.update(app_id, request))
             .toEqual(response);
     });
 
@@ -105,7 +107,7 @@ describe('applications', () => {
         const response = data.replace_application_response;
         mock.onPut(`/applications/${app_id}`)
             .reply(expectRequestToMatch(request, response));
-        expect(await LeaseQ.application.replace(app_id, request))
+        expect(await api.application.replace(app_id, request))
             .toEqual(response);
     });
 
@@ -115,7 +117,7 @@ describe('applications', () => {
         const response = data.sign_application_response;
         mock.onPost(`/applications/${app_id}/sign`)
             .reply(expectRequestToMatch(request, response));
-        expect(await LeaseQ.application.sign(app_id, request))
+        expect(await api.application.sign(app_id, request))
             .toEqual(response);
     });
 
@@ -124,7 +126,7 @@ describe('applications', () => {
         const response = data.get_quotes_response;
         mock.onGet(`/applications/${app_id}/quotes`)
             .reply(200, response);
-        expect(await LeaseQ.application.quotes(app_id))
+        expect(await api.application.quotes(app_id))
             .toEqual(response);
     });
 
@@ -134,7 +136,7 @@ describe('applications', () => {
         const response = data.upload_document_response;
         mock.onPost(`/applications/${app_id}/documents`)
             .reply(expectRequestToMatch(request, response));
-        expect(await LeaseQ.application.upload(app_id, request))
+        expect(await api.application.upload(app_id, request))
             .toEqual(response);
     });
 
