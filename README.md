@@ -19,25 +19,40 @@ npm install leaseq-node
 
 ## Usage
 
-**WARNING:** this is going to change soon.
+Async/Await:
 
 ```typescript
 import LeaseQ from 'leaseq-node';
 
-const connect = async () => {
+await LeaseQ.login({
+    email: '<your email>',
+    password: '<your password>'
+});
 
-    const api = new LeaseQ();
+const { app_id } = await LeaseQ.application.submit({
+    /* application data */
+});
 
-    await api.login({
-        email: '<email>',
-        password: '<password>',
-    });
+await LeaseQ.application.upload(app_id, {
+    /* file data */
+});
+```
 
-    api.submitApplication({
-        /* application data ... */
-    });
+Promises:
 
-};
+```typescript
+import LeaseQ from 'leaseq-node';
+
+LeaseQ.login({
+    email: '<your email>',
+    password: '<your password>'
+})
+    .then(() => LeaseQ.application.submit({
+        /* application data */
+    }))
+    .then(({ app_id }) => LeaseQ.application.upload(app_id, {
+        /* file data */
+    }));
 ```
 
 ## Contribution

@@ -9,17 +9,6 @@ const defaults = {
 
 export interface LeaseQ {
 
-    (config: {
-        email: string;
-        password: string;
-        dealer_id: string;
-        base_url?: string;
-    }): Promise<{
-        auth_token: string;
-        auth_scheme: string;
-        expires: string;
-    }>;
-
     application: {
 
         /**
@@ -378,66 +367,58 @@ const toAuthorization = (auth_token?: string, auth_scheme = 'LeaseQ') =>
 const toPromise = async (response: AxiosResponse) => Promise.resolve(response.data);
 
 /**
- * Authenticate the user
  * 
- * @param credentials
- * @return
+ * LeaseQ Software Development Kit
+ * 
  */
-const login: LeaseQ["login"] = async (credentials) =>
-    /* Don't send the authentication token */
-    axios.post(`/login`, credentials, { baseURL: axios.defaults.baseURL })
-        .then(toPromise)
-        .then(async response => {
-            axios.defaults.headers.Authorization = toAuthorization(response.auth_token);
-            return Promise.resolve(response);
-        });
+export const LeaseQ: LeaseQ = {
 
-const LeaseQ: LeaseQ = async (config) => {
-    axios.defaults.baseURL = config.base_url || defaults.base_url;
-    return login({
-        email: config.email,
-        password: config.password,
-        dealer_id: config.dealer_id
-    });
-};
-
-LeaseQ.login = login;
-
-LeaseQ.lender = {
-    rates: async () =>
-        axios.get(`/lenders/rates`)
+    login: async (credentials) =>
+        /* Don't send the authentication token */
+        axios.post(`/login`, credentials, { baseURL: axios.defaults.baseURL })
             .then(toPromise)
-};
+            .then(async response => {
+                axios.defaults.headers.Authorization = toAuthorization(response.auth_token);
+                return Promise.resolve(response);
+            }),
 
-LeaseQ.application = {
+    lender: {
+        rates: async () =>
+            axios.get(`/lenders/rates`)
+                .then(toPromise)
+    },
 
-    submit: async (application) =>
-        axios.post(`/applications`, application)
-        .then(toPromise),
+    application: {
 
-    get: async (app_id) =>
-        axios.get(`/applications/${encodeURIComponent(app_id)}`)
-            .then(toPromise),
-
-    update: async (app_id, application) =>
-        axios.patch(`/applications/${encodeURIComponent(app_id)}`, application)
-            .then(toPromise),
-
-    replace: async (app_id, application) =>
-        axios.put(`/applications/${encodeURIComponent(app_id)}`, application)
-            .then(toPromise),
-
-    sign: async (app_id, signature) =>
-        axios.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature)
+        submit: async (application) =>
+            axios.post(`/applications`, application)
             .then(toPromise),
     
-    quotes: async (app_id) =>
-        axios.get(`/applications/${encodeURIComponent(app_id)}/quotes`)
-            .then(toPromise),
-
-    upload: async (app_id, document) =>
-        axios.post(`/applications/${encodeURIComponent(app_id)}/documents`, document)
-            .then(toPromise)
+        get: async (app_id) =>
+            axios.get(`/applications/${encodeURIComponent(app_id)}`)
+                .then(toPromise),
+    
+        update: async (app_id, application) =>
+            axios.patch(`/applications/${encodeURIComponent(app_id)}`, application)
+                .then(toPromise),
+    
+        replace: async (app_id, application) =>
+            axios.put(`/applications/${encodeURIComponent(app_id)}`, application)
+                .then(toPromise),
+    
+        sign: async (app_id, signature) =>
+            axios.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature)
+                .then(toPromise),
+        
+        quotes: async (app_id) =>
+            axios.get(`/applications/${encodeURIComponent(app_id)}/quotes`)
+                .then(toPromise),
+    
+        upload: async (app_id, document) =>
+            axios.post(`/applications/${encodeURIComponent(app_id)}/documents`, document)
+                .then(toPromise)
+    
+    },
 
 };
 
