@@ -32,6 +32,7 @@
       "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "/__tests__/.*\\.(ts|js)$",
-    "setupTestFrameworkScriptFile": "<rootDir>/setupTests.ts"
+    "setupTestFrameworkScriptFile": "<rootDir>/setupTests.ts",
+    "modulePathIgnorePatterns": ["data.ts"]
   }
 }
