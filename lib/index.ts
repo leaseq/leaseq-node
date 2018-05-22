@@ -161,41 +161,38 @@ export interface LeaseQ {
         }>;
     };
 
-    lender: {
-
-        /**
-         * Get estimated financing rates
-         * 
-         * Gets estimated financing rates from LeaseQ's marketplace of Lenders.
-         * Note: These are estimated rates. Actual rates will vary based on
-         * actual credit rating of customer and/or business.
-         * 
-         * GET /v1/lenders/rates
-         * https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
-         */
-        rates: () => Promise<{
-            credit_tiers: {
-                /* The borrower's credit tier (i.e. A,B,C,D) */
-                credit_tier: 'A' | 'B' | 'C' | 'D';
-                terms: {
-                    /* The term length in months */
-                    term_length: number;
-                    rates: {
-                        /* The minimum finance amount */
-                        amount_min: number;
-                        /* The maximum finance amount */
-                        amount_max: number;
-                        /* The estimated average lender financing rate */
-                        rate: number;
-                        /* The estimated average lender financing money factor.
-                        This can be used to calculate monthly payment (e.g.
-                        monthly payment = money factor × finance amount) */
-                        factor: number;
-                    }[]
-                }[];
-            }[]
-        }>
-    };
+    /**
+     * Get estimated financing rates
+     * 
+     * Gets estimated financing rates from LeaseQ's marketplace of Lenders.
+     * Note: These are estimated rates. Actual rates will vary based on
+     * actual credit rating of customer and/or business.
+     * 
+     * GET /v1/lenders/rates
+     * https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
+     */
+    rates: () => Promise<{
+        credit_tiers: {
+            /* The borrower's credit tier (i.e. A,B,C,D) */
+            credit_tier: 'A' | 'B' | 'C' | 'D';
+            terms: {
+                /* The term length in months */
+                term_length: number;
+                rates: {
+                    /* The minimum finance amount */
+                    amount_min: number;
+                    /* The maximum finance amount */
+                    amount_max: number;
+                    /* The estimated average lender financing rate */
+                    rate: number;
+                    /* The estimated average lender financing money factor.
+                    This can be used to calculate monthly payment (e.g.
+                    monthly payment = money factor × finance amount) */
+                    factor: number;
+                }[]
+            }[];
+        }[]
+    }>
 
     /**
      * Authenticate the user
@@ -371,12 +368,10 @@ export const LeaseQ: LeaseQ = {
                 return Promise.resolve(response);
             }),
 
-    lender: {
-        rates: async () =>
-            axios.get(`/lenders/rates`)
-                .then(toPromise)
-    },
-
+    rates: async () =>
+        axios.get(`/lenders/rates`)
+            .then(toPromise),
+            
     application: {
 
         submit: async (application) =>

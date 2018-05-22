@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest --env=jsdom"
+    "test": "jest --watch --env=jsdom"
   },
   "author": "LeaseQ <admin@leaseq.com> (https://leaseq.com)",
   "license": "UNLICENSED",
