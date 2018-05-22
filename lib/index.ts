@@ -1,11 +1,5 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
-
-const defaults = {
-    base_url: `https://dashboard-dev.leaseq.com/api`,
-    email: ``,
-    password: ``,
-};
-
+import defaults from 'defaults';
 
 export interface LeaseQ {
 
@@ -366,11 +360,6 @@ const toAuthorization = (auth_token?: string, auth_scheme = 'LeaseQ') =>
  */
 const toPromise = async (response: AxiosResponse) => Promise.resolve(response.data);
 
-/**
- * 
- * LeaseQ Software Development Kit
- * 
- */
 export const LeaseQ: LeaseQ = {
 
     login: async (credentials) =>
