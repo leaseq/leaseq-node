@@ -1,0 +1,38 @@
+{
+  "name": "leaseq-node",
+  "version": "0.0.1",
+  "description": "Submit credit applications to LeaseQ",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leaseq/leaseq-node.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --env=jsdom"
+  },
+  "author": "LeaseQ <admin@leaseq.com> (https://leaseq.com)",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.18.0",
+    "typescript": "^2.8.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^22.2.3",
+    "axios-mock-adapter": "^1.15.0",
+    "ts-jest": "^22.4.6"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "/__tests__/.*\\.(ts|js)$",
+    "setupTestFrameworkScriptFile": "<rootDir>/setupTests.ts"
+  }
+}
