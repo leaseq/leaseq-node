@@ -34,13 +34,13 @@ export const submit_full_application_request = {
     remote_id: 'eb9832f3-8d3f-fe24-eff0-d180d3fd513a',
 
     products: [{
-        product_id: 'SBIR_Pr_Code',
+        product_code: 'SBIR_Pr_Code',
         name: 'Pepper',
         description: 'Pepper',
         quantity: 3,
         price: 4000
     }, {
-        product_id: 'SBIR_Pr_Code',
+        product_code: 'SBIR_Pr_Code',
         name: 'Service Plan',
         description: 'Service Plan',
         quantity: 1,
@@ -148,13 +148,13 @@ export const replace_application_request = {
     remote_id: 'eb9832f3-8d3f-fe24-eff0-d180d3fd513a',
 
     products: [{
-        product_id: 'SBIR_Pr_Code',
+        product_code: 'SBIR_Pr_Code',
         name: 'Pepper',
         description: 'Pepper',
         quantity: 3,
         price: 4000
     }, {
-        product_id: 'SBIR_Pr_Code',
+        product_code: 'SBIR_Pr_Code',
         name: 'Service Plan',
         description: 'Service Plan',
         quantity: 1,
