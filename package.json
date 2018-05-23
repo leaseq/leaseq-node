@@ -11,7 +11,8 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --watch --env=node",
-    "test:insecure": "export NODE_TLS_REJECT_UNAUTHORIZED=\"0\" && jest --watch --env=node"
+    "test:ci": "jest --env=node",
+    "test:insecure": "export NODE_TLS_REJECT_UNAUTHORIZED=\"0\" && yarn test"
   },
   "author": "LeaseQ <admin@leaseq.com> (https://leaseq.com)",
   "license": "UNLICENSED",
