@@ -24,16 +24,18 @@ Async/Await:
 ```typescript
 import LeaseQ from 'leaseq-node';
 
-await LeaseQ.login({
+const api = LeaseQ();
+
+await api.login({
     email: '<your email>',
     password: '<your password>'
 });
 
-const { app_id } = await LeaseQ.application.submit({
+const { app_id } = await api.application.submit({
     /* application data */
 });
 
-await LeaseQ.application.upload(app_id, {
+await api.application.upload(app_id, {
     /* file data */
 });
 ```
@@ -43,7 +45,9 @@ Promises:
 ```typescript
 import LeaseQ from 'leaseq-node';
 
-LeaseQ.login({
+const api = Leaseq();
+
+api.login({
     email: '<your email>',
     password: '<your password>'
 })
