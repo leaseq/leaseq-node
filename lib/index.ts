@@ -1,9 +1,5 @@
 import axios, { AxiosResponse, AxiosInstance } from 'axios';
 
-/*****************************************************************************/
-
-const baseURL = `https://dashboard-dev.leaseq.com/api`;
-
 type Status = "New" | "App Widget Lead" | "Decline" | "App Submitted" | "Approved" | "Contract Out" | "Contract In" | "Prefunding Released" | "PO Issued" | "Lost" | "Funded";
 
 type FullApplication = Application & {
@@ -111,75 +107,26 @@ type Guarantor = {
 };
 
 /**
- * Convert an authentication token into an Authorization header
- *
- * @param auth_token an authentication token. If you don't have
- * one, get it from `login()`.
- * @param [auth_scheme] an authentication scheme (e.g. 'LeaseQ').
- * 'LeaseQ' is the only supported scheme so far.  
- * @return an authorization header (e.g. "Authorization LeaseQ
- * $Auth_Token")
- */
-const toAuthorization = (auth_token?: string, auth_scheme = 'LeaseQ') =>
-        auth_token ? [auth_scheme, auth_token].join(' ') : undefined
-
-/**
- * Convert axios response to regular promises
- *
- * @param response
- * @return a promise that resolves to a plain response body
- * without extra axios properties
- */
-const toPromise = async (response: AxiosResponse) => Promise.resolve(response.data);
-
-/**
+ * 
  * Create an instance of the SDK
+ * 
  */
 export const LeaseQ = () => {
 
     let config = {
-        baseURL,
+        /* TODO: set the baseURL in config and bake into compile */
+        baseURL: `https://dashboard-dev.leaseq.com/api`,
         headers: {},
     };
 
-    const network = axios.create(config);
-
     /**
-     * Get estimated financing rates
-     * 
-     * Gets estimated financing rates from LeaseQ's marketplace of Lenders.
-     * Note: These are estimated rates. Actual rates will vary based on
-     * actual credit rating of customer and/or business.
-     * 
-     * GET /v1/lenders/rates
-     * https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
-     * 
+     * Convert axios response to regular promises
+     *
+     * @param response
+     * @return a promise that resolves to a plain response body
+     * without extra axios properties
      */
-    const rates: () => Promise<{
-        credit_tiers: {
-            /* The borrower's credit tier (i.e. A,B,C,D) */
-            credit_tier: 'A' | 'B' | 'C' | 'D';
-            terms: {
-                /* The term length in months */
-                term_length: number;
-                rates: {
-                    /* The minimum finance amount */
-                    amount_min: number;
-                    /* The maximum finance amount */
-                    amount_max: number;
-                    /* The estimated average lender financing rate */
-                    rate: number;
-                    /* The estimated average lender financing money factor.
-                    This can be used to calculate monthly payment (e.g.
-                    monthly payment = money factor × finance amount) */
-                    factor: number;
-                }[]
-            }[];
-        }[]
-    }> =
-        async () =>
-            network.get(`/lenders/rates`, config)
-                .then(toPromise);
+    const toPromise = async (response: AxiosResponse) => Promise.resolve(response.data);
 
     /**
      * Authenticate the user
@@ -196,33 +143,67 @@ export const LeaseQ = () => {
      * POST /v1/login
      * https://github.com/leaseq/api-docs/blob/master/login/post.md
      */
-    const login: (
-        credentials: {
-            /* Your email address */
-            email: string,
-            /* You password */
-            password: string,
-            /* Your tenant or dealer id */
-            dealer_id?: string
-        }
-    ) => Promise<{
+    const login = async (credentials: {
+        /* Your email address */
+        email: string,
+        /* You password */
+        password: string,
+        /* Your tenant or dealer id */
+        dealer_id?: string
+    }): Promise<{
         /* The authentication token */
         auth_token: string;
         /* The authentication scheme. Only `LeaseQ` is supported. */
         auth_scheme: string;
         /* The expiration date/time of the token */
         expires: string;
-    }> = async (credentials) =>
+    }> =>
         /* Don't send the authentication token */
-        network.post(`/login`, credentials, config)
+        axios.post(`/login`, credentials, config)
             .then(toPromise)
             .then(async response => {
                 config.headers = Object.assign(config.headers, {
-                    Authorization: toAuthorization(response.auth_token)
+                    Authorization: `${response.auth_scheme} ${response.auth_token}`
                 });
                 return Promise.resolve(response);
             });
 
+    /**
+     * Get estimated financing rates
+     * 
+     * Gets estimated financing rates from LeaseQ's marketplace of Lenders.
+     * Note: These are estimated rates. Actual rates will vary based on
+     * actual credit rating of customer and/or business.
+     * 
+     * GET /v1/lenders/rates
+     * https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
+     * 
+     */
+    const rates =
+        async (): Promise<{
+            credit_tiers: {
+                /* The borrower's credit tier (i.e. A,B,C,D) */
+                credit_tier: 'A' | 'B' | 'C' | 'D';
+                terms: {
+                    /* The term length in months */
+                    term_length: number;
+                    rates: {
+                        /* The minimum finance amount */
+                        amount_min: number;
+                        /* The maximum finance amount */
+                        amount_max: number;
+                        /* The estimated average lender financing rate */
+                        rate: number;
+                        /* The estimated average lender financing money factor.
+                        This can be used to calculate monthly payment (e.g.
+                        monthly payment = money factor × finance amount) */
+                        factor: number;
+                    }[]
+                }[];
+            }[]
+        }> =>
+            axios.get(`/lenders/rates`, config)
+                .then(toPromise);
 
     /**
      * Create a new credit application
@@ -231,16 +212,16 @@ export const LeaseQ = () => {
      * https://github.com/leaseq/api-docs/blob/master/applications/post.md
      */
 
-    const submit: (application: Application) => Promise<{
+    const submit = async (application: Application): Promise<{
         /* The id of the new application */
         app_id: string;
         /* The status of the new application - Funded, Lost, PO Issued,
         Prefunding Released, Contract In, Contract Out, Approved, App
         Submitted, Decline, App Widget Lead, New */
         status: Status;
-    }> = async (application) =>
-            network.post(`/applications`, application, config)
-                .then(toPromise);
+    }> =>
+        axios.post(`/applications`, application, config)
+            .then(toPromise);
 
     /**
      * Get a credit application
@@ -248,7 +229,7 @@ export const LeaseQ = () => {
      * GET /v1/applications/{application_id}
      * https://github.com/leaseq/api-docs/blob/master/applications/get.md
      */
-    const get: (app_id: string) => Promise<{
+    const get = async (app_id: string): Promise<{
         /* (guid) The id of the new application */
         app_id: string;
         /* An optional identifier that can be set to correlate LeaseQ
@@ -265,9 +246,9 @@ export const LeaseQ = () => {
         total_amount: number;
         /* The date/time when the application was last updated. */
         updated_date: string;
-    }> = async (app_id) =>
-            network.get(`/applications/${encodeURIComponent(app_id)}`, config)
-                .then(toPromise);
+    }> =>
+        axios.get(`/applications/${encodeURIComponent(app_id)}`, config)
+            .then(toPromise);
 
     /**
      * Update part of an application
@@ -275,7 +256,7 @@ export const LeaseQ = () => {
      * PATCH /v1/applications/{application_id}
      * https://github.com/leaseq/api-docs/blob/master/applications/put.md
      */
-    const update: (
+    const update = async (
         app_id: string,
         application: {
             /* The status of the new application - Funded, Lost, PO Issued,
@@ -288,14 +269,14 @@ export const LeaseQ = () => {
             total_amount: number;
 
         }
-    ) => Promise<{
+    ): Promise<{
         status: Status;
         lost_reason?: string;
     } | {
         total_amount: number;
-    }> = async (app_id, application) =>
-            network.patch(`/applications/${encodeURIComponent(app_id)}`, application, config)
-                .then(toPromise);
+    }> =>
+        axios.patch(`/applications/${encodeURIComponent(app_id)}`, application, config)
+            .then(toPromise);
 
     /**
      * Replace an application
@@ -303,14 +284,14 @@ export const LeaseQ = () => {
      * PUT /v1/applications/{application_id}
      * https://github.com/leaseq/api-docs/blob/master/applications/put.md
      */
-    const replace: (app_id: string, application: Application) => Promise<{
+    const replace = async (app_id: string, application: Application): Promise<{
         /* The id of the application */
         app_id: string;
         /* The status of the application */
         status: Status;
-    }> = async (app_id, application) =>
-            network.put(`/applications/${encodeURIComponent(app_id)}`, application, config)
-                .then(toPromise);
+    }> =>
+        axios.put(`/applications/${encodeURIComponent(app_id)}`, application, config)
+            .then(toPromise);
 
     /**
     * Electronically signs an application
@@ -318,26 +299,26 @@ export const LeaseQ = () => {
     * POST /v1/applications/{application_id}/sign
     * https://github.com/leaseq/api-docs/blob/master/applications/sign.md
     */
-    const sign: (
-    app_id: string,
-    signature: {
-        /* (guid) The id of the selected quote */
-        selected_quote: string;
-        /* The desired term length from the selected quote */
-        selected_term: string;
-        /* The name of the signer */
-        name: string;
-        /* The title of the signer (e.g. Owner, Principal, CFO, ...) */
-        title: string;
-    } 
-    ) => Promise<{
-    /* The signature hash */
-    signature: string;
-    /* The date/time of the signing */
-    date: string;
-    }> = async (app_id, signature) =>
-            network.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature, config)
-                .then(toPromise);
+    const sign = async (
+        app_id: string,
+        signature: {
+            /* (guid) The id of the selected quote */
+            selected_quote: string;
+            /* The desired term length from the selected quote */
+            selected_term: string;
+            /* The name of the signer */
+            name: string;
+            /* The title of the signer (e.g. Owner, Principal, CFO, ...) */
+            title: string;
+        } 
+    ): Promise<{
+        /* The signature hash */
+        signature: string;
+        /* The date/time of the signing */
+        date: string;
+    }> =>
+        axios.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature, config)
+            .then(toPromise);
 
     /**
      * Get quotes for an application
@@ -345,7 +326,7 @@ export const LeaseQ = () => {
      * GET /v1/applications/{application_id}/quotes
      * https://github.com/leaseq/api-docs/blob/master/applications/quotes/get.md
      */
-    const quotes: (app_id: string) => Promise<{
+    const quotes = async (app_id: string): Promise<{
         /* (guid) The quote id */
         quote_id: string;
         /* The lender name */
@@ -367,9 +348,9 @@ export const LeaseQ = () => {
             /* The monthly payment */
             monthly_payment: number;
         }[];
-    }> = async (app_id) =>
-            network.get(`/applications/${encodeURIComponent(app_id)}/quotes`, config)
-                .then(toPromise);
+    }> =>
+        axios.get(`/applications/${encodeURIComponent(app_id)}/quotes`, config)
+            .then(toPromise);
 
     /**
      * Upload document
@@ -377,7 +358,7 @@ export const LeaseQ = () => {
      * POST /v1/applications/{application_id}/documents
      * https://github.com/leaseq/api-docs/blob/master/applications/documents/post.md
      */
-    const upload: (
+    const upload = async (
         app_id: string,
         document: {
             /* The document type: invoice, quote, contract */
@@ -387,34 +368,28 @@ export const LeaseQ = () => {
             /* (base64 encoded) The document data */
             data: string;
         }
-    ) => Promise<{
+    ): Promise<{
         /* (guid) The id of the uploaded document */
         document_id: string;
-    }> = async (app_id, document) =>
-            network.post(`/applications/${encodeURIComponent(app_id)}/documents`, document, config)
-                .then(toPromise);
-
-    /*****************************************************************************/
+    }> =>
+        axios.post(`/applications/${encodeURIComponent(app_id)}/documents`, document, config)
+            .then(toPromise);
 
     /* TODO: I wish I could export all these functions directly, but nested objects
             and type definitions don't seem to mix well. */
 
-    const application = {
-        submit,
-        get,
-        update,
-        replace,
-        sign,
-        quotes,
-        upload,
-    };
-
     return {
         login,
         rates,
-        application,
-        /* for testing only */
-        network,
+        application: {
+            submit,
+            get,
+            update,
+            replace,
+            sign,
+            quotes,
+            upload,
+        }
     };
 
 };

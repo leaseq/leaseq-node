@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest --watch --env=node"
+    "test": "export NODE_TLS_REJECT_UNAUTHORIZED=\"0\" && jest --watch --env=node"
   },
   "author": "LeaseQ <admin@leaseq.com> (https://leaseq.com)",
   "license": "UNLICENSED",
@@ -18,8 +18,10 @@
     "axios": "^0.18.0"
   },
   "devDependencies": {
+    "@types/dotenv": "^4.0.3",
     "@types/jest": "^22.2.3",
     "axios-mock-adapter": "^1.15.0",
+    "dotenv": "^5.0.1",
     "ts-jest": "^22.4.6",
     "typescript": "^2.8.3"
   },
@@ -32,6 +34,8 @@
       "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "/__tests__/.*\\.(ts|js)$",
-    "modulePathIgnorePatterns": ["data.ts"]
+    "modulePathIgnorePatterns": [
+      "data.ts"
+    ]
   }
 }

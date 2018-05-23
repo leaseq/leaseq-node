@@ -6,6 +6,9 @@
 # Build artifacts
 /build
 
+# Secrets
+.env
+
 # Miscellaneous
 .DS_Store
 npm-debug.log*

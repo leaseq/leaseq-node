@@ -1,19 +1,36 @@
-import defaults from '../lib/defaults';
-import { LeaseQ } from '../lib';
+import dotenv from 'dotenv'
+import axios from 'axios';
+
+import LeaseQ from '../lib';
 import * as data from './data';
 
-const unknown_id = '00000000-0000-0000-0000-000000000000';
 
-let unauthenticatedApi: LeaseQ;
-let api: LeaseQ;
+/* Load environment variables */
+dotenv.config();
+const env = process.env;
+
+if(env.PROXY_HOST && env.PROXY_PORT) {
+    axios.defaults.proxy = {
+        host: env.PROXY_HOST,
+        port: parseInt(env.PROXY_PORT, 10),
+    };
+}
+
+const unknown_id = '00000000-0000-0000-0000-000000000000';
+let unauthenticatedApi;
+let api;
 
 beforeAll(async () => {
     unauthenticatedApi = LeaseQ();
     api = LeaseQ();
-    /* TODO: load environment variables */
+
+    if(!env.LEASEQ_EMAIL || !env.LEASEQ_PASSWORD) {
+        throw Error("LEASEQ_EMAIL or LEASEQ_PASSWORD are not set. To run integration tests, create a file called \".env\" with valid credentials");
+    }
+
     await api.login({
-        email: '',
-        password: '',
+        email: env.EMAIL,
+        password: env.PASSWORD,
     });
 });
 
@@ -39,7 +56,7 @@ describe('lenders', () => {
 describe('applications', () => {
 
     let app_id: string;
-    let submitAppResponse: LeaseQ.SubmitApplicationResponse;
+    let submitAppResponse;
 
     beforeAll(async () => {
         submitAppResponse = await api.application.submit(data.submit_full_application_request);
@@ -64,7 +81,7 @@ describe('applications', () => {
     });
 
     it('can submit partial applications', async () => {
-        let response: LeaseQ.SubmitApplicationResponse;
+        let response;
         response = await api.application.submit(data.submit_partial_application_request);
         expect(response).toBeDefined();
         expect(response.app_id).toBeDefined();

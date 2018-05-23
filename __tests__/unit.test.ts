@@ -4,11 +4,11 @@ import LeaseQ from '../lib';
 import * as data from './data';
 
 let mock: MockAdapter;
-let api: LeaseQ;
+let api;
 
 beforeAll(async () => {
     api = LeaseQ();
-    mock = new MockAdapter(api.network);
+    mock = new MockAdapter(axios);
     /* Don't log in because we're using a mock */
 });
 
