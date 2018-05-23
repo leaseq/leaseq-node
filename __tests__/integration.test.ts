@@ -21,16 +21,15 @@ let unauthenticatedApi;
 let api;
 
 beforeAll(async () => {
-    unauthenticatedApi = LeaseQ();
-    api = LeaseQ();
-
-    if(!env.LEASEQ_EMAIL || !env.LEASEQ_PASSWORD) {
+    if(!env.LEASEQ_EMAIL || !env.LEASEQ_PASSWORD) {  
         throw Error("LEASEQ_EMAIL or LEASEQ_PASSWORD are not set. To run integration tests, create a file called \".env\" with valid credentials");
     }
 
+    unauthenticatedApi = LeaseQ();
+    api = LeaseQ();
     await api.login({
-        email: env.EMAIL,
-        password: env.PASSWORD,
+        email: env.LEASEQ_EMAIL,
+        password: env.LEASEQ_PASSWORD,
     });
 });
 
