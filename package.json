@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "export NODE_TLS_REJECT_UNAUTHORIZED=\"0\" && jest --watch --env=node"
+    "test": "jest --watch --env=node",
+    "test:insecure": "export NODE_TLS_REJECT_UNAUTHORIZED=\"0\" && jest --watch --env=node"
   },
   "author": "LeaseQ <admin@leaseq.com> (https://leaseq.com)",
   "license": "UNLICENSED",
