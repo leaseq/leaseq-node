@@ -6,4 +6,4 @@ COPY ./package*.json ./
 
 RUN yarn install
 COPY ./ ./
-CMD ["yarn", "test", "--testPathPattern=integration.test.ts"]
+CMD ["yarn", "test:ci", "--testPathPattern=integration.test.ts"]
