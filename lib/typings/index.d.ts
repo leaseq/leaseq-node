@@ -291,7 +291,9 @@ declare namespace LeaseQ {
     };
 
     interface Product {
-        product_id: string;
+        type: 'truck' | 'audio visual' | 'automotive' | 'controls' | 'coffee' | 'computer' | 'construction' | 'copier' | 'dental' | 'dry cleaning' | 'fabrication' | 'fitness' | 'fitness-crossfit' | 'fork lift' | 'gaming' | 'cannabis' | 'hvac' | 'ice' | 'janitorial' | 'led' | 'laundry' | 'machine tool' | 'mailroom' | 'medical' | 'modular building' | 'office' | 'pos' | 'printing' | 'restaurant' | 'solar' | 'farm' | 'vending' | 'veterinary' | 'other';
+        condition: 'new' | 'used';
+        product_code: string;
         description?: string;
         discounted_price?: number;
         name?: string;

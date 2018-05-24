@@ -34,42 +34,50 @@ export const post_login_response: LeaseQ.LoginResponse = {
 export const submit_full_application_request: LeaseQ.SubmitFullApplicationRequest = {
     type: 'business',
     is_full_application: true,
-    total_amount: 20000,
-    remote_id,
+    total_amount: 20733.89,
+    remote_id: 'eb9832f3-8d3f-fe24-eff0-d180d3fd513a',
 
     products: [{
-        product_id: 'SBIR_Pr_Code',
-        name: 'Pepper',
-        description: 'Pepper',
-        quantity: 3,
-        price: 4000
-    }, {
-        product_id: 'SBIR_Pr_Code',
-        name: 'Service Plan',
-        description: 'Service Plan',
-        quantity: 1,
-        price: 3000
-    }],
-    equipment: [{
-        type: 'audio visual',
-        amount: 50000,
-        description: 'RED Weapon - Helium 8K S35',
+        type: 'restaurant',
+        product_code: 'ICE10000',
+        name: 'Ice Maker',
+        description: 'Capacities up to 2900 pounds per day',
         condition: 'new',
+        quantity: 2,
+        price: 2830.00
+    }, {
+        type: 'restaurant',
+        product_code: 'CBG20388',
+        name: 'Gas Charbroiler',
+        description: '24-inch gas broiler',
+        condition: 'new',
+        quantity: 3,
+        price: 777.00
+    },
+    {
+        type: 'restaurant',
+        product_code: 'RF38271',
+        name: 'Display Freezer',
+        description: 'Two-section display freezer',
+        condition: 'new',
+        quantity: 2,
+        price: 4992.30
     }],
+
     billing: [{
         charge: 'Tax',
-        description: '20 percent tax',
-        price: 250
+        description: '7 percent tax',
+        price: 1258.29
     }, {
         charge: 'Delivery charge',
         description: 'Delivery charge',
-        price: 100
+        price: 1500.00
     }],
 
     company: {
-        name: 'ABC Corp',
-        dba: 'ABC Corp [ optional ]',
-        phone: '7815554433',
+        name: 'ABC Restaurant',
+        dba: 'ABC',
+        phone: '7815555555',
         address: '17 North Ave',
         city: 'Boston',
         state: 'MA',
@@ -79,10 +87,10 @@ export const submit_full_application_request: LeaseQ.SubmitFullApplicationReques
     },
 
     guarantors: [{
-        first_name: 'Paul',
-        last_name: 'Testcase',
-        email: 'abc@xyz.com',
-        phone: '7815554433',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john.doe@example.com',
+        phone: '7815555555',
         address: '16 Summer St',
         city: 'Boston',
         state: 'MA',
@@ -152,17 +160,30 @@ export const replace_application_request: LeaseQ.ReplaceApplicationRequest = {
     remote_id,
 
     products: [{
-        product_id: 'SBIR_Pr_Code',
-        name: 'Pepper',
-        description: 'Pepper',
-        quantity: 3,
-        price: 4000
+        type: 'restaurant',
+        product_code: 'ICE10000',
+        name: 'Ice Maker',
+        description: 'Capacities up to 2900 pounds per day',
+        condition: 'new',
+        quantity: 2,
+        price: 2830.00
     }, {
-        product_id: 'SBIR_Pr_Code',
-        name: 'Service Plan',
-        description: 'Service Plan',
-        quantity: 1,
-        price: 3000
+        type: 'restaurant',
+        product_code: 'CBG20388',
+        name: 'Gas Charbroiler',
+        description: '24-inch gas broiler',
+        condition: 'new',
+        quantity: 3,
+        price: 777.00
+    },
+    {
+        type: 'restaurant',
+        product_code: 'RF38271',
+        name: 'Display Freezer',
+        description: 'Two-section display freezer',
+        condition: 'new',
+        quantity: 2,
+        price: 4992.30
     }],
 
     billing: [{
