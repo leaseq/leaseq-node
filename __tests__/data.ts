@@ -102,6 +102,7 @@ export const submit_full_application_request: LeaseQ.SubmitFullApplicationReques
 
 export const submit_partial_application_request: LeaseQ.SubmitPartialApplicationRequest = {
     type: 'business',
+    remote_id: 'c8014e1f-71d3-4a9c-b37b-8bddd7e9552c',
     guarantors: [
         {
             email: 'test.automation@leaseq.com'
