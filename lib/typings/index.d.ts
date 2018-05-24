@@ -317,6 +317,7 @@ declare namespace LeaseQ {
         zip: string;
         ein: string;
         years_in_business: number;
+        structure: 'llc' | 'sole_prop' | 'partnership' | 'c_corp' | 's_corp';
     }
 
     interface Guarantor {
