@@ -1,11 +1,11 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import axios from 'axios';
 
 import { LeaseQ } from '../lib';
 import * as data from './data';
 
 /* Load environment variables */
-dotenv.config();
+config();
 const env = process.env;
 
 if(env.PROXY_HOST && env.PROXY_PORT) {
