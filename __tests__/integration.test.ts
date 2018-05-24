@@ -16,7 +16,7 @@ if(env.PROXY_HOST && env.PROXY_PORT) {
 }
 
 // extend default timepout
-jest.setTimeout(2000);
+jest.setTimeout(10000);
 
 
 let unauthenticatedApi: LeaseQ;
