@@ -1,11 +1,11 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import axios from 'axios';
 
 import { LeaseQ } from '../lib';
 import * as data from './data';
 
 /* Load environment variables */
-dotenv.config();
+config();
 const env = process.env;
 
 if(env.PROXY_HOST && env.PROXY_PORT) {
@@ -14,6 +14,10 @@ if(env.PROXY_HOST && env.PROXY_PORT) {
         port: parseInt(env.PROXY_PORT, 10),
     };
 }
+
+// extend default timepout
+jest.setTimeout(2000);
+
 
 let unauthenticatedApi: LeaseQ;
 let api: LeaseQ;
@@ -52,7 +56,7 @@ describe('lenders', () => {
 
 });
 
-describe('applications', () => {
+describe('full applications', () => {
 
     let app_id: string;
     let submitAppResponse: LeaseQ.SubmitApplicationResponse;
@@ -66,7 +70,7 @@ describe('applications', () => {
         }
     });
 
-    it('can submit full applications', async () => {
+    it('can submit application', async () => {
         expect(submitAppResponse).toBeDefined();
         expect(submitAppResponse.app_id).toBeDefined();
         expect(submitAppResponse.app_id.length).toBeGreaterThan(0);
@@ -75,19 +79,6 @@ describe('applications', () => {
 
         // ensure the call requres authantication
         await expect(unauthenticatedApi.submitApplication(data.submit_full_application_request))
-            .rejects
-            .toThrowError('Request failed with status code 401');
-    });
-
-    it('can submit partial applications', async () => {
-        let response: LeaseQ.SubmitApplicationResponse;
-        response = await api.submitApplication(data.submit_partial_application_request);
-        expect(response).toBeDefined();
-        expect(response.app_id).toBeDefined();
-        expect(response.app_id.length).toBeGreaterThan(0);
-
-        // ensure the call requres authantication
-        await expect(unauthenticatedApi.submitApplication(data.submit_partial_application_request))
             .rejects
             .toThrowError('Request failed with status code 401');
     });
@@ -210,6 +201,99 @@ describe('applications', () => {
 
         // ensure the call fails if not found
         await expect(api.updateApplication(unknown_id, patchRequest))
+            .rejects
+            .toThrowError('Request failed with status code 404');
+    });
+
+    it('can change application amount', async () => {
+        const newAmount = 50000;
+        await api.updateApplication(app_id, {
+            total_amount: newAmount
+        });
+
+        // a change in scope should cause an application to go to "AppIn" status
+        const response = await api.getApplication(app_id);
+        expect(response).toBeDefined();
+        expect(response.status).toEqual('AppIn');
+
+        // ensure the call requres authantication
+        await expect(unauthenticatedApi.updateApplication(app_id, {
+            total_amount: 10000
+        }))
+            .rejects
+            .toThrowError('Request failed with status code 401');
+
+        // ensure the call fails if not found
+        await expect(api.updateApplication(unknown_id, {
+            total_amount: 10000
+        }))
+            .rejects
+            .toThrowError('Request failed with status code 404');
+    });
+
+    it('can upload application documents', async () => {
+        const response = await api.uploadDocument(app_id, data.upload_document_request);
+        expect(response).toBeDefined();
+        expect(response.document_id).toBeDefined();
+        expect(response.document_id.length).toBeGreaterThan(0);
+
+        // ensure the call requres authantication
+        await expect(unauthenticatedApi.uploadDocument(app_id, data.upload_document_request))
+            .rejects
+            .toThrowError('Request failed with status code 401');
+
+        // ensure the call fails if not found
+        await expect(api.uploadDocument(unknown_id, data.upload_document_request))
+            .rejects
+            .toThrowError('Request failed with status code 404');
+    });
+
+});
+
+describe('partial applications', () => {
+
+    let app_id: string;
+    let submitAppResponse: LeaseQ.SubmitApplicationResponse;
+
+    beforeAll(async () => {
+        try {
+            submitAppResponse = await api.submitApplication(data.submit_partial_application_request);
+            app_id = submitAppResponse.app_id;
+        } catch (error) {
+            // ignore
+        }
+    });
+
+    it('can submit application', async () => {
+        expect(submitAppResponse).toBeDefined();
+        expect(submitAppResponse.app_id).toBeDefined();
+        expect(submitAppResponse.app_id.length).toBeGreaterThan(0);
+        expect(submitAppResponse.status).toBeDefined();
+        expect(submitAppResponse.status).toEqual('WigLead');
+
+        // ensure the call requres authantication
+        await expect(unauthenticatedApi.submitApplication(data.submit_full_application_request))
+            .rejects
+            .toThrowError('Request failed with status code 401');
+    });
+
+    it('can get application', async () => {
+        const response = await api.getApplication(app_id);
+        expect(response).toBeDefined();
+        expect(response.app_id).toBeDefined();
+        expect(response.status).toBeDefined();
+        expect(response.remote_id).toBeDefined();
+        expect(response.remote_id).toEqual(data.submit_partial_application_request.remote_id);
+        expect(response.total_amount).toBeDefined();
+        expect(response.updated_date).toBeDefined();
+
+        // ensure the call requres authantication
+        await expect(unauthenticatedApi.getApplication(app_id))
+            .rejects
+            .toThrowError('Request failed with status code 401');
+
+        // ensure the call fails if not found
+        await expect(api.getApplication(unknown_id))
             .rejects
             .toThrowError('Request failed with status code 404');
     });

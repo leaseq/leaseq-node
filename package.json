@@ -9,7 +9,7 @@
     "url": "git+https://github.com/leaseq/leaseq-node.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "test": "jest --watch --env=node",
     "test:ci": "jest --env=node --testResultsProcessor=jest-teamcity-reporter",
     "test:insecure": "export NODE_TLS_REJECT_UNAUTHORIZED=\"0\" && yarn test"
