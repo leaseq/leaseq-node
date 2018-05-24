@@ -1,9 +1,8 @@
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 import axios from 'axios';
 
 import LeaseQ from '../lib';
 import * as data from './data';
-
 
 /* Load environment variables */
 dotenv.config();

@@ -2,16 +2,18 @@ import axios, { AxiosResponse, AxiosInstance } from 'axios';
 
 type Status = "New" | "App Widget Lead" | "Decline" | "App Submitted" | "Approved" | "Contract Out" | "Contract In" | "Prefunding Released" | "PO Issued" | "Lost" | "Funded";
 
-type FullApplication = Application & {
+type Application = FullApplication | PartialApplication;
+
+type FullApplication = BaseApplication & {
     is_full_application: true;
     guarantors: Guarantor[];
 }
 
-type PartialApplication = Partial<Application> & {
+type PartialApplication = Partial<BaseApplication> & {
     is_full_application?: false;
 }
 
-type Application = {
+type BaseApplication = {
 
     /* The application type: `"business"`, `"corporate"`, `"nonprofit"`,
     or `"municipal"`. */
