@@ -84,6 +84,7 @@ describe('full applications', () => {
     });
 
     it('can replace application', async () => {
+        expect(app_id).toBeDefined();
         const response = await api.replaceApplication(app_id, data.replace_application_request);
         expect(response).toBeDefined();
         expect(response.app_id).toBeDefined();
@@ -102,6 +103,7 @@ describe('full applications', () => {
     });
 
     it('can get application', async () => {
+        expect(app_id).toBeDefined();
         const response = await api.getApplication(app_id);
         expect(response).toBeDefined();
         expect(response.app_id).toBeDefined();
@@ -123,6 +125,7 @@ describe('full applications', () => {
     });
 
     it('can get application quotes', async () => {
+        expect(app_id).toBeDefined();
         const quotesResponse = await api.getQuotes(app_id);
         expect(quotesResponse).toBeDefined();
         expect(quotesResponse.quotes).toBeDefined();
@@ -150,6 +153,7 @@ describe('full applications', () => {
     });
 
     it('can sign application', async () => {
+        expect(app_id).toBeDefined();
         const quotesResponse = await api.getQuotes(app_id);
         expect(quotesResponse).toBeDefined();
         expect(quotesResponse.quotes).toBeDefined();
@@ -183,6 +187,8 @@ describe('full applications', () => {
     });
 
     it('can change application status', async () => {
+        expect(app_id).toBeDefined();
+
         const patchRequest: LeaseQ.UpdateApplicationRequest = {
             status: 'Lost',
             lost_reason: 'Lost to cash'
@@ -206,6 +212,8 @@ describe('full applications', () => {
     });
 
     it('can change application amount', async () => {
+        expect(app_id).toBeDefined();
+
         const newAmount = 50000;
         await api.updateApplication(app_id, {
             total_amount: newAmount
@@ -232,6 +240,7 @@ describe('full applications', () => {
     });
 
     it('can upload application documents', async () => {
+        expect(app_id).toBeDefined();
         const response = await api.uploadDocument(app_id, data.upload_document_request);
         expect(response).toBeDefined();
         expect(response.document_id).toBeDefined();
@@ -278,6 +287,7 @@ describe('partial applications', () => {
     });
 
     it('can get application', async () => {
+        expect(app_id).toBeDefined();
         const response = await api.getApplication(app_id);
         expect(response).toBeDefined();
         expect(response.app_id).toBeDefined();
@@ -299,6 +309,7 @@ describe('partial applications', () => {
     });
 
     it('can change application amount', async () => {
+        expect(app_id).toBeDefined();
         const newAmount = 50000;
         await api.updateApplication(app_id, {
             total_amount: newAmount
@@ -325,6 +336,7 @@ describe('partial applications', () => {
     });
 
     it('can upload application documents', async () => {
+        expect(app_id).toBeDefined();
         const response = await api.uploadDocument(app_id, data.upload_document_request);
         expect(response).toBeDefined();
         expect(response.document_id).toBeDefined();
