@@ -89,7 +89,7 @@ export const submit_full_application_request: LeaseQ.SubmitFullApplicationReques
     guarantors: [{
         first_name: 'John',
         last_name: 'Doe',
-        email: 'john.doe@example.com',
+        email: 'test_automation@leaseq.com',
         phone: '7815555555',
         address: '16 Summer St',
         city: 'Boston',
