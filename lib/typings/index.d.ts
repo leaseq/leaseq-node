@@ -265,9 +265,45 @@ declare namespace LeaseQ {
         owns_install_location?: boolean;
     }
 
+    type EquipmentVerticals = 
+        'audio visual' | 
+        'automotive' | 
+        'controls' | 
+        'coffee' | 
+        'computer' | 
+        'construction' | 
+        'copier' | 
+        'dental' | 
+        'dry cleaning' | 
+        'fabrication' | 
+        'fitness' | 
+        'fitness-crossfit' | 
+        'fork lift' | 
+        'gaming' | 
+        'cannabis' | 
+        'hvac' | 
+        'ice' | 
+        'janitorial' |
+        'led' |
+        'laundry' | 
+        'machine tool' | 
+        'mailroom' | 
+        'medical' | 
+        'modular building' | 
+        'office' | 
+        'pos' | 
+        'printing' | 
+        'restaurant' | 
+        'solar' | 
+        'farm' | 
+        'truck' | 
+        'vending' | 
+        'veterinary' | 
+        'other';
+
     // Legacy
     type Equipment = {
-        type: 'truck' | 'audio visual' | 'automotive' | 'controls' | 'coffee' | 'computer' | 'construction' | 'copier' | 'dental' | 'dry cleaning' | 'fabrication' | 'fitness' | 'fitness-crossfit' | 'fork lift' | 'gaming' | 'cannabis' | 'hvac' | 'ice' | 'janitorial' | 'led' | 'laundry' | 'machine tool' | 'mailroom' | 'medical' | 'modular building' | 'office' | 'pos' | 'printing' | 'restaurant' | 'solar' | 'farm' | 'vending' | 'veterinary' | 'other'
+        type: EquipmentVerticals;
         condition: 'new' | 'used';
         description?: string;
         amount?: number;
@@ -291,7 +327,7 @@ declare namespace LeaseQ {
     };
 
     interface Product {
-        type: 'truck' | 'audio visual' | 'automotive' | 'controls' | 'coffee' | 'computer' | 'construction' | 'copier' | 'dental' | 'dry cleaning' | 'fabrication' | 'fitness' | 'fitness-crossfit' | 'fork lift' | 'gaming' | 'cannabis' | 'hvac' | 'ice' | 'janitorial' | 'led' | 'laundry' | 'machine tool' | 'mailroom' | 'medical' | 'modular building' | 'office' | 'pos' | 'printing' | 'restaurant' | 'solar' | 'farm' | 'vending' | 'veterinary' | 'other';
+        type: EquipmentVerticals;
         condition: 'new' | 'used';
         product_code: string;
         description?: string;
@@ -317,6 +353,7 @@ declare namespace LeaseQ {
         zip: string;
         ein: string;
         years_in_business: number;
+        structure: 'llc' | 'sole_prop' | 'partnership' | 'c_corp' | 's_corp';
     }
 
     interface Guarantor {

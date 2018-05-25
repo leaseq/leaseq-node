@@ -83,7 +83,8 @@ export const submit_full_application_request: LeaseQ.SubmitFullApplicationReques
         state: 'MA',
         zip: '01802',
         ein: '00-0000000',
-        years_in_business: 5
+        years_in_business: 5,
+        structure: 'llc'
     },
 
     guarantors: [{
@@ -206,7 +207,8 @@ export const replace_application_request: LeaseQ.ReplaceApplicationRequest = {
         state: 'MA',
         zip: '01802',
         ein: '00-0000000',
-        years_in_business: 5
+        years_in_business: 5,
+        structure: 'llc'
     },
 
     guarantors: [{
