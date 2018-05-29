@@ -60,17 +60,21 @@ describe('full applications', () => {
 
     let app_id: string;
     let submitAppResponse: LeaseQ.SubmitApplicationResponse;
+    let submitAppResponseError:any;
 
     beforeAll(async () => {
         try {
             submitAppResponse = await api.submitApplication(data.submit_full_application_request);
             app_id = submitAppResponse.app_id;
-        } catch (error) {
-            // ignore
+        } catch (ex) {
+            submitAppResponseError = ex;
         }
     });
 
     it('can submit application', async () => {
+        if(submitAppResponseError)
+            console.log(submitAppResponseError.response);
+        expect(submitAppResponseError).not.toBeDefined();
         expect(submitAppResponse).toBeDefined();
         expect(submitAppResponse.app_id).toBeDefined();
         expect(submitAppResponse.app_id.length).toBeGreaterThan(0);
@@ -263,17 +267,21 @@ describe('partial applications', () => {
 
     let app_id: string;
     let submitAppResponse: LeaseQ.SubmitApplicationResponse;
+    let submitAppResponseError:any;
 
     beforeAll(async () => {
         try {
             submitAppResponse = await api.submitApplication(data.submit_partial_application_request);
             app_id = submitAppResponse.app_id;
-        } catch (error) {
-            // ignore
+        } catch (ex) {
+            submitAppResponseError = ex;
         }
     });
 
     it('can submit application', async () => {
+        if(submitAppResponseError)
+            console.log(submitAppResponseError.response);
+        expect(submitAppResponseError).not.toBeDefined();
         expect(submitAppResponse).toBeDefined();
         expect(submitAppResponse.app_id).toBeDefined();
         expect(submitAppResponse.app_id.length).toBeGreaterThan(0);
