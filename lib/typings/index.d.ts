@@ -67,24 +67,12 @@ declare namespace LeaseQ {
         (application: SubmitApplicationRequest): Promise<SubmitApplicationResponse>;
     }
 
-    type SubmitApplicationRequest = Application & ({
-        is_full_application: true;
-        guarantors: Partial<Guarantor> & {
-            first_name: string,
-            last_name: string,
-            ssn: string;
-        }[];
-    } | {
-        is_full_application?: false;
-        guarantors: Partial<Guarantor> & {
-            email: string,
-        }[];
-    });
+    type SubmitApplicationRequest = Application;
 
     interface SubmitApplicationResponse {
         app_id: UUID;
         status: ApplicationStatus;
-        quotes: Quote[];
+        quotes?: Quote[];
     }
 
     /**
@@ -100,10 +88,11 @@ declare namespace LeaseQ {
 
     interface GetApplicationResponse {
         app_id: UUID;
-        total_amount: number;
         remote_id?: string;
-        lender: string;
-        updated_date: string;
+        status: ApplicationStatus;
+        lender?: string;
+        total_amount?: number;
+        updated_date?: string;
     }
 
     /**
@@ -117,12 +106,13 @@ declare namespace LeaseQ {
         (app_id: string, application: UpdateApplicationRequest): Promise<UpdateApplicationResponse>;
     }
 
-    type UpdateApplicationRequest = Partial<Application>;
-
-    type UpdateApplicationResponse = {
-        app_id: UUID;
-        status: ApplicationStatus;   
+    type UpdateApplicationRequest = {
+        status?: ApplicationStatus;
+        lost_reason?: string;
+        total_amount?: number;   
     };
+
+    type UpdateApplicationResponse = {};
 
     /**
      * Replace an application
@@ -380,17 +370,18 @@ declare namespace LeaseQ {
         | 'livery';
 
     type Application = {
-        
         type: ApplicationType;
-        status: ApplicationStatus;
+        status?: ApplicationStatus;
         total_amount?: number;
         remote_id?: string;
         
         company?: Company;
         products?: Product[];
         billing?: Charge[];
-        guarantors: Guarantor[];
         quotes?: Quote[];
+
+        /* WARNING: Do not put guarantors here. It will cause type errors that
+        don't match the API docs. */
         
         // hvac fields
         owns_install_location?: boolean;
@@ -408,5 +399,11 @@ declare namespace LeaseQ {
         number_of_vehicle?: number;
         number_of_trailers?: number;
         has_finanaced_before?: boolean;
-    };
+    } & ({
+        is_full_application: true;
+        guarantors?: Guarantor[];
+    } | {
+        is_full_application?: false;
+        guarantors: Array<Partial<Guarantor> & { email: string }>;
+    });
 }

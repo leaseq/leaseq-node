@@ -31,7 +31,7 @@ export const post_login_response: LeaseQ.LoginResponse = {
  * POST /v1/applications
  * https://github.com/leaseq/api-docs/blob/master/applications/post.md
  */
-export const submit_full_application_request: LeaseQ.SubmitFullApplicationRequest = {
+export const submit_full_application_request: LeaseQ.SubmitApplicationRequest = {
     type: 'business',
     is_full_application: true,
     total_amount: 20733.89,
@@ -101,7 +101,7 @@ export const submit_full_application_request: LeaseQ.SubmitFullApplicationReques
     }]
 };
 
-export const submit_partial_application_request: LeaseQ.SubmitPartialApplicationRequest = {
+export const submit_partial_application_request: LeaseQ.SubmitApplicationRequest = {
     type: 'business',
     remote_id: 'c8014e1f-71d3-4a9c-b37b-8bddd7e9552c',
     guarantors: [
@@ -123,7 +123,7 @@ export const submit_application_response: LeaseQ.SubmitApplicationResponse = {
  * https://github.com/leaseq/api-docs/blob/master/applications/get.md
  */
 export const get_application_response: LeaseQ.GetApplicationResponse = {
-    app_id: 'GUID',
+    app_id: 'f1bc5b1c-2d8f-4c18-aa24-2136ad2b038c',
     status: 'AppIn',
     lender: 'Univest Capital, Inc.',
     updated_date: '2018-03-17T07:27:22.214Z',
@@ -141,14 +141,14 @@ export const update_application_request: LeaseQ.UpdateApplicationRequest = {
     total_amount: 40000,
 };
 
-export const update_application_response: LeaseQ.UpdateApplicationResponse = update_application_request;
-
 export const update_application_request_2: LeaseQ.UpdateApplicationRequest = {
     status: 'Lost',
     lost_reason: 'Lost To Cash',
 };
 
-export const update_application_response_2: LeaseQ.UpdateApplicationResponse = update_application_request_2;
+export const update_application_response: LeaseQ.UpdateApplicationResponse = {};
+
+export const update_application_response_2: LeaseQ.UpdateApplicationResponse = {};
 
 /**
  * Replace an application
