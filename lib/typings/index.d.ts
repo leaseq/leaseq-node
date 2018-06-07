@@ -64,44 +64,28 @@ declare namespace LeaseQ {
      */
 
     interface SubmitApplication {
-        (application: SubmitFullApplicationRequest | SubmitPartialApplicationRequest): Promise<SubmitApplicationResponse>;
+        (application: SubmitApplicationRequest): Promise<SubmitApplicationResponse>;
     }
-    
-    type SubmitApplicationRequest = Pick<Application, "type" | "total_amount" | "remote_id" | "products" | "equipment" | "billing" | "company" | "owns_install_location">
 
-    type SubmitFullApplicationRequest = SubmitApplicationRequest & {
+    type SubmitApplicationRequest = Application & ({
         is_full_application: true;
-        guarantors: {
-                first_name: string,
-                last_name: string,
-                ssn: string;
-                email?: string,
-                phone?: string,
-                address?: string;
-                city?: string;
-                state?: string;
-                zip?: string;
-                percentage_owned?: string;
-            }[];
-    }
-
-    type SubmitPartialApplicationRequest = SubmitApplicationRequest & {
+        guarantors: Partial<Guarantor> & {
+            first_name: string,
+            last_name: string,
+            ssn: string;
+        }[];
+    } | {
         is_full_application?: false;
-        guarantors: {
-                first_name?: string,
-                last_name?: string,
-                ssn?: string;
-                email: string,
-                phone?: string,
-                address?: string;
-                city?: string;
-                state?: string;
-                zip?: string;
-                percentage_owned?: string;
-            }[];
-    }
+        guarantors: Partial<Guarantor> & {
+            email: string,
+        }[];
+    });
 
-    interface SubmitApplicationResponse extends Pick<Application, "app_id" | "status" | "quotes"> { }
+    interface SubmitApplicationResponse {
+        app_id: UUID;
+        status: ApplicationStatus;
+        quotes: Quote[];
+    }
 
     /**
      * Get a credit application
@@ -114,9 +98,12 @@ declare namespace LeaseQ {
         (app_id: string): Promise<GetApplicationResponse>;
     }
 
-    interface GetApplicationResponse extends Pick<Application, "app_id" | "total_amount" | "remote_id" | "status"> {
-        updated_date: string;
+    interface GetApplicationResponse {
+        app_id: UUID;
+        total_amount: number;
+        remote_id?: string;
         lender: string;
+        updated_date: string;
     }
 
     /**
@@ -130,9 +117,12 @@ declare namespace LeaseQ {
         (app_id: string, application: UpdateApplicationRequest): Promise<UpdateApplicationResponse>;
     }
 
-    type UpdateApplicationRequest = Partial<Pick<Application, "status" | "total_amount" | "lost_reason">>;
+    type UpdateApplicationRequest = Partial<Application>;
 
-    type UpdateApplicationResponse = UpdateApplicationRequest;
+    type UpdateApplicationResponse = {
+        app_id: UUID;
+        status: ApplicationStatus;   
+    };
 
     /**
      * Replace an application
@@ -145,9 +135,12 @@ declare namespace LeaseQ {
         (app_id: string, application: ReplaceApplicationRequest): Promise<ReplaceApplicationResponse>;
     }
 
-    interface ReplaceApplicationRequest extends Pick<Application, "type" | "total_amount" | "remote_id" | "products" | "billing" | "company" | "guarantors"> { }
+    type ReplaceApplicationRequest = SubmitApplicationRequest;
 
-    interface ReplaceApplicationResponse extends Pick<Application, "app_id" | "status" | "quotes"> { }
+    type ReplaceApplicationResponse = {
+        app_id: UUID;
+        status: ApplicationStatus;   
+    };
 
     /**
      * Electronically signs an application
@@ -221,7 +214,10 @@ declare namespace LeaseQ {
 
     interface GetRatesResponse {
         credit_tiers: {
-            credit_tier: 'A' | 'B' | 'C' | 'D';
+            credit_tier: 'A'
+                | 'B'
+                | 'C'
+                | 'D';
             terms: {
                 term_length: number;
                 rates: {
@@ -233,108 +229,26 @@ declare namespace LeaseQ {
             }[];
         }[]
     }
-
+    
     //
-    // Business Objects
+    // Miscellaneous
     //
+    interface Product {
+        product_code?: string;
+        name?: string;
+        quantity?: number;
+        price?: number;
 
-    interface Application {
-        app_id: string;
-        type: "business" | "consumer" | "corporate" | "nonprofit" | "municipal";
-        status: "New" | "WigLead" | "Lead" | "AppIn" | "AppSubmitted" | "Decline" | "Approved" | "DocsOut" | "DocsIn" | "PrefundingReleased" | "POIssued" | "Lost" | "Funded";
-        total_amount?: number;
-        remote_id?: string;
-
-        company?: Company;
-        products?: Product[];
-        billing?: Charge[];
-        equipment?: Equipment[];
-        guarantors: Guarantor[];
-        quotes?: Quote[];
-
-        lender?: {
-            name: string;
-        };
-        term?: string;
-        approved_date?: string;
-        funded_date?: string;
-        signed_date?: string;
-        lost_reason?: string;
-
-        // additional vertical specific fields
-        owns_install_location?: boolean;
-    }
-
-    type EquipmentVerticals = 
-        'audio visual' | 
-        'automotive' | 
-        'controls' | 
-        'coffee' | 
-        'computer' | 
-        'construction' | 
-        'copier' | 
-        'dental' | 
-        'dry cleaning' | 
-        'fabrication' | 
-        'fitness' | 
-        'fitness-crossfit' | 
-        'fork lift' | 
-        'gaming' | 
-        'cannabis' | 
-        'hvac' | 
-        'ice' | 
-        'janitorial' |
-        'led' |
-        'laundry' | 
-        'machine tool' | 
-        'mailroom' | 
-        'medical' | 
-        'modular building' | 
-        'office' | 
-        'pos' | 
-        'printing' | 
-        'restaurant' | 
-        'solar' | 
-        'farm' | 
-        'truck' | 
-        'vending' | 
-        'veterinary' | 
-        'other';
-
-    // Legacy
-    type Equipment = {
-        type: EquipmentVerticals;
-        condition: 'new' | 'used';
+        type?: EquipmentVerticals;
         description?: string;
-        amount?: number;
-        // truck
-        downpayment?: number;
-        vehicle_type?: 'longhaul' | 'shorthaul' | 'utility' | 'glider' | 'livery';
+        condition?: 'new' | 'used';
+
+        vehicle_type?: VehicleType;
         vehicle_make?: string;
         vehicle_model?: string;
+        vehicle_link?: string;
         vehicle_year?: number;
         vehicle_milage?: number;
-        vehicle_yearsataddress?: number;
-        vehicle_drivefor?: string;
-        vehicle_industryexp?: boolean;
-        vehicle_compyears?: number;
-        vehicle_industrydesc?: string;
-        vehicle_hascdl?: boolean;
-        vehicle_cdlyear?: number;
-        vehicle_numtrucks?: number;
-        vehicle_numtrailers?: number;
-        vehicle_financedbefore?: boolean;
-    };
-
-    interface Product {
-        type: EquipmentVerticals;
-        condition: 'new' | 'used';
-        product_code: string;
-        description?: string;
-        discounted_price?: number;
-        name?: string;
-        price?: number;
-        quantity?: number;
     }
 
     interface Charge {
@@ -353,7 +267,7 @@ declare namespace LeaseQ {
         zip: string;
         ein: string;
         years_in_business: number;
-        structure: 'llc' | 'sole_prop' | 'partnership' | 'c_corp' | 's_corp';
+        structure: CompanyStructure;
     }
 
     interface Guarantor {
@@ -396,4 +310,103 @@ declare namespace LeaseQ {
         zip: string; // aka "postalCode"
     }
 
+    type UUID = string;
+
+    type ApplicationType = "business"
+        | "consumer"
+        | "corporate"
+        | "nonprofit"
+        | "municipal";
+
+    type ApplicationStatus = "New"
+        | "WigLead"
+        | "Lead"
+        | "AppIn"
+        | "AppSubmitted"
+        | "Decline"
+        | "Approved"
+        | "DocsOut"
+        | "DocsIn"
+        | "PrefundingReleased"
+        | "POIssued"
+        | "Lost"
+        | "Funded";
+
+    type EquipmentVerticals = "audio visual"
+        | "automotive"
+        | "controls"
+        | "coffee"
+        | "computer"
+        | "construction"
+        | "copier"
+        | "dental"
+        | "dry cleaning"
+        | "fabrication"
+        | "fitness"
+        | "fitness-crossfit"
+        | "fork lift"
+        | "gaming"
+        | "cannabis"
+        | "hvac"
+        | "ice"
+        | "janitorial"
+        | "led"
+        | "laundry"
+        | "machine tool"
+        | "mailroom"
+        | "medical"
+        | "modular building"
+        | "office"
+        | "pos"
+        | "printing"
+        | "restaurant"
+        | "solar"
+        | "farm"
+        | "truck"
+        | "vending"
+        | "veterinary"
+        | "other";
+
+    type CompanyStructure = "sole_prop"
+        | "llc"
+        | "partnership"
+        | "c_corp"
+        | "s_corp";
+
+    type VehicleType = 'longhaul'
+        | 'shorthaul'
+        | 'utility'
+        | 'glider'
+        | 'livery';
+
+    type Application = {
+        
+        type: ApplicationType;
+        status: ApplicationStatus;
+        total_amount?: number;
+        remote_id?: string;
+        
+        company?: Company;
+        products?: Product[];
+        billing?: Charge[];
+        guarantors: Guarantor[];
+        quotes?: Quote[];
+        
+        // hvac fields
+        owns_install_location?: boolean;
+
+        // truck fields
+        downpayment?: number;
+        years_at_current_address?: number;
+        haul_source?: string;
+        has_industry_experience?: boolean;
+        years_of_experience?: number;
+        experience_description?: string;
+        has_cdl?: boolean;
+        years_with_cdl?: number;
+        has_other_vehicles?: boolean;
+        number_of_vehicle?: number;
+        number_of_trailers?: number;
+        has_finanaced_before?: boolean;
+    };
 }
