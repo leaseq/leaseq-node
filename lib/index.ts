@@ -203,3 +203,5 @@ export class LeaseQ implements LeaseQ.SDK {
             .then(LeaseQ.toPromise)
 
 }
+
+export default LeaseQ;
