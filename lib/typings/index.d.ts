@@ -271,6 +271,19 @@ declare namespace LeaseQ {
         state?: string;
         zip?: string;
         percentage_owned?: string;
+        
+        // truck fields
+        years_at_current_address?: number;
+        haul_source?: string;
+        has_industry_experience?: boolean;
+        years_of_experience?: number;
+        experience_description?: string;
+        has_cdl?: boolean;
+        years_with_cdl?: number;
+        has_other_vehicles?: boolean;
+        number_of_vehicle?: number;
+        number_of_trailers?: number;
+        has_finanaced_before?: boolean;
     }
 
     interface Quote {
@@ -388,17 +401,7 @@ declare namespace LeaseQ {
 
         // truck fields
         downpayment?: number;
-        years_at_current_address?: number;
-        haul_source?: string;
-        has_industry_experience?: boolean;
-        years_of_experience?: number;
-        experience_description?: string;
-        has_cdl?: boolean;
-        years_with_cdl?: number;
-        has_other_vehicles?: boolean;
-        number_of_vehicle?: number;
-        number_of_trailers?: number;
-        has_finanaced_before?: boolean;
+
     } & ({
         is_full_application: true;
         guarantors?: Guarantor[];
