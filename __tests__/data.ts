@@ -13,13 +13,13 @@ export const remote_id = 'eb9832f3-8d3f-fe24-eff0-d180d3fd513a';
  * POST /v1/login
  * https://github.com/leaseq/api-docs/blob/master/login/post.md
  */
-export const post_login_request: LeaseQ.LoginRequest = {
+export const post_login_request: LoginRequest = {
     email: 'user@example.com',
     password: 'StrongPassword',
     tenant_id: '<tennant or dealer id>',
 };
 
-export const post_login_response: LeaseQ.LoginResponse = {
+export const post_login_response: LoginResponse = {
     auth_token: '<token>',
     auth_scheme: 'LeaseQ',
     expires: 'Mon, 01 Jan 2000 00:00:00 GMT',
@@ -31,7 +31,7 @@ export const post_login_response: LeaseQ.LoginResponse = {
  * POST /v1/applications
  * https://github.com/leaseq/api-docs/blob/master/applications/post.md
  */
-export const submit_full_application_request: LeaseQ.SubmitApplicationRequest = {
+export const submit_full_application_request: SubmitApplicationRequest = {
     type: 'business',
     is_full_application: true,
     total_amount: 20733.89,
@@ -101,7 +101,7 @@ export const submit_full_application_request: LeaseQ.SubmitApplicationRequest = 
     }]
 };
 
-export const submit_partial_application_request: LeaseQ.SubmitApplicationRequest = {
+export const submit_partial_application_request: SubmitApplicationRequest = {
     type: 'business',
     remote_id: 'c8014e1f-71d3-4a9c-b37b-8bddd7e9552c',
     guarantors: [
@@ -111,7 +111,7 @@ export const submit_partial_application_request: LeaseQ.SubmitApplicationRequest
     ]
 };
 
-export const submit_application_response: LeaseQ.SubmitApplicationResponse = {
+export const submit_application_response: SubmitApplicationResponse = {
     app_id: '00000000-0000-0000-0000-000000000000',
     status: 'Lead',
 };
@@ -122,7 +122,7 @@ export const submit_application_response: LeaseQ.SubmitApplicationResponse = {
  * GET /v1/applications/{application_id}
  * https://github.com/leaseq/api-docs/blob/master/applications/get.md
  */
-export const get_application_response: LeaseQ.GetApplicationResponse = {
+export const get_application_response: GetApplicationResponse = {
     app_id: 'f1bc5b1c-2d8f-4c18-aa24-2136ad2b038c',
     status: 'AppIn',
     lender: 'Univest Capital, Inc.',
@@ -137,18 +137,18 @@ export const get_application_response: LeaseQ.GetApplicationResponse = {
  * PATCH /v1/applications/{application_id}
  * https://github.com/leaseq/api-docs/blob/master/applications/patch.md
  */
-export const update_application_request: LeaseQ.UpdateApplicationRequest = {
+export const update_application_request: UpdateApplicationRequest = {
     total_amount: 40000,
 };
 
-export const update_application_request_2: LeaseQ.UpdateApplicationRequest = {
+export const update_application_request_2: UpdateApplicationRequest = {
     status: 'Lost',
     lost_reason: 'Lost To Cash',
 };
 
-export const update_application_response: LeaseQ.UpdateApplicationResponse = {};
+export const update_application_response: UpdateApplicationResponse = {};
 
-export const update_application_response_2: LeaseQ.UpdateApplicationResponse = {};
+export const update_application_response_2: UpdateApplicationResponse = {};
 
 /**
  * Replace an application
@@ -156,7 +156,7 @@ export const update_application_response_2: LeaseQ.UpdateApplicationResponse = {
  * PUT /v1/applications/{application_id}
  * https://github.com/leaseq/api-docs/blob/master/applications/put.md
  */
-export const replace_application_request: LeaseQ.ReplaceApplicationRequest = {
+export const replace_application_request: ReplaceApplicationRequest = {
     type: 'business',
     total_amount: 40000,
     remote_id,
@@ -225,7 +225,7 @@ export const replace_application_request: LeaseQ.ReplaceApplicationRequest = {
     }]
 };
 
-export const replace_application_response: LeaseQ.ReplaceApplicationResponse = {
+export const replace_application_response: ReplaceApplicationResponse = {
     app_id: '00000000-0000-0000-0000-000000000000',
     status: 'Lead',
 };
@@ -236,14 +236,14 @@ export const replace_application_response: LeaseQ.ReplaceApplicationResponse = {
  * POST /v1/applications/{application_id}/sign
  * https://github.com/leaseq/api-docs/blob/master/applications/sign.md
  */
-export const sign_application_request: LeaseQ.SignApplicationRequest = {
+export const sign_application_request: SignApplicationRequest = {
     selected_quote: '00000000-0000-0000-0000-000000000000',
     selected_term: 48,
     name: 'John Smith',
     consent: 'Agreement to perform hard credit pull',
 };
 
-export const sign_application_response: LeaseQ.SignApplicationResponse = {
+export const sign_application_response: SignApplicationResponse = {
     signature: 'o08oAGRZzup8RX7QX4eZRjmSmntgxqE3ROyiQaNCkqk=',
     date: '2018-01-09T17:07:52.216-06:00'
 };
@@ -254,7 +254,7 @@ export const sign_application_response: LeaseQ.SignApplicationResponse = {
  * GET /v1/applications/{application_id}/quotes
  * https://github.com/leaseq/api-docs/blob/master/applications/quotes/get.md
  */
-export const get_quotes_response: LeaseQ.GetQuotesResponse = {
+export const get_quotes_response: GetQuotesResponse = {
     quotes: [{
         quote_id: '00000000-0000-0000-0000-000000000000',
         lender_name: 'ACME Capital',
@@ -288,7 +288,7 @@ export const get_quotes_response: LeaseQ.GetQuotesResponse = {
  * POST /v1/applications/{application_id}/documents
  * https://github.com/leaseq/api-docs/blob/master/applications/documents/post.md
  */
-export const upload_document_request: LeaseQ.UploadDocumentRequest = {
+export const upload_document_request: UploadDocumentRequest = {
     type: 'invoice',
     name: 'Sample Inovice.pdf',
     // tslint:disable-next-line
@@ -1138,7 +1138,7 @@ OTc4NmYwYTZkYjNmYTQ2ZmViNzNmPgo8ZTFhZDY1OGMyOTQ5Nzg2ZjBhNmRiM2Zh
 NDZmZWI3M2Y+IF0gPj4Kc3RhcnR4cmVmCjM5MzAzCiUlRU9GCg==`
 };
 
-export const upload_document_response: LeaseQ.UploadDocumentResponse = {
+export const upload_document_response: UploadDocumentResponse = {
     document_id: '00000000-0000-0000-0000-000000000000'
 };
 
@@ -1148,7 +1148,7 @@ export const upload_document_response: LeaseQ.UploadDocumentResponse = {
  * GET /v1/lenders/rates
  * https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
  */
-export const get_rates_response: LeaseQ.GetRatesResponse = {
+export const get_rates_response: GetRatesResponse = {
     credit_tiers: [
         {
             credit_tier: 'A',

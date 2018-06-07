@@ -1,12 +1,12 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
-export class LeaseQ implements LeaseQ.SDK {
+export class LeaseQ implements SDK {
 
     private readonly axios_config: AxiosRequestConfig;
 
     /**
-     * @param {LeaseQ.Config} config 
+     * @param {Config} config 
      */
-    constructor(config?: LeaseQ.Config) {
+    constructor(config?: Config) {
 
         const default_base_url = `https://dashboard-dev.leaseq.com/api`;
 
@@ -70,8 +70,8 @@ export class LeaseQ implements LeaseQ.SDK {
      * 
      * @see https://github.com/leaseq/api-docs/blob/master/login/post.md
      */
-    login: LeaseQ.Login = async (credentials) =>
-        axios.post<LeaseQ.LoginResponse>(`/login`, credentials, this.axios_config)
+    login: Login = async (credentials) =>
+        axios.post<LoginResponse>(`/login`, credentials, this.axios_config)
             .then(LeaseQ.toPromise)
             .then(async response => {
                 this.axios_config.headers.Authorization = LeaseQ.toAuthorization(response.auth_token);
@@ -81,20 +81,20 @@ export class LeaseQ implements LeaseQ.SDK {
     /**
      * Create a new credit application
      *
-     * @param {LeaseQ.ApplyRequest} application
+     * @param {ApplyRequest} application
      *  - `type` *string* – The application type: "business", "consumer",
      *    "corporate", "nonprofit", or "municipal".
      *  - `total_amount` *number* – The total amount 
      *  - `remote_id` *string* – An optional identifier that can be set to correlate
      *    LeaseQ applications with entities in other systems. This field is
      *    searchable in the LeaseQ dashboard
-     *  - `products` *LeaseQ.Product[]* – An array of products. See the definition of *LeaseQ.Product*.
-     *  - `equipment` *LeaseQ.Equipment* – Equipment information. See the definition of *LeaseQ.Equipment*.
-     *  - `billing` *LeaseQ.Charge[]* – An array of line items. See the definition of *LeaseQ.Charge*.
-     *  - `company` *LeaseQ.Company* – Company information. See the definition of *LeaseQ.Company*.
-     *  - `guarantors` *LeaseQ.Guarantor[]* – An array of guarantors. See the definition of *LeaseQ.Guarantor*.
+     *  - `products` *Product[]* – An array of products. See the definition of *Product*.
+     *  - `equipment` *Equipment* – Equipment information. See the definition of *Equipment*.
+     *  - `billing` *Charge[]* – An array of line items. See the definition of *Charge*.
+     *  - `company` *Company* – Company information. See the definition of *Company*.
+     *  - `guarantors` *Guarantor[]* – An array of guarantors. See the definition of *Guarantor*.
      *
-     * @return {Promise<LeaseQ.ApplyResponse>}
+     * @return {Promise<ApplyResponse>}
      *  - `app_id` *string* – The ID of the new application
      *  - `status` *string* – The status of the new application: "Funded",
      *    "Lost", "PO Issued", "Prefunding Released", "Contract In",
@@ -103,7 +103,7 @@ export class LeaseQ implements LeaseQ.SDK {
      *
      * @see https://github.com/leaseq/api-docs/blob/master/login/post.md
      */
-    submitApplication: LeaseQ.SubmitApplication = async (application) => {
+    submitApplication: SubmitApplication = async (application) => {
         return axios.post(`/applications`, application, this.axios_config)
             .then(LeaseQ.toPromise);
     }
@@ -112,11 +112,11 @@ export class LeaseQ implements LeaseQ.SDK {
      * Get a credit application
      * 
      * @param {string} app_id
-     * @return {Promise<LeaseQ.GetApplicationResponse>}
+     * @return {Promise<GetApplicationResponse>}
      * 
      * @see https://github.com/leaseq/api-docs/blob/master/applications/get.md
      */
-    getApplication: LeaseQ.GetApplication = async (app_id) =>
+    getApplication: GetApplication = async (app_id) =>
         axios.get(`/applications/${encodeURIComponent(app_id)}`, this.axios_config)
             .then(LeaseQ.toPromise)
 
@@ -124,7 +124,7 @@ export class LeaseQ implements LeaseQ.SDK {
      * Update an application
      * 
      * @param {string} app_id 
-     * @param {LeaseQ.UpdateApplicationRequest} application 
+     * @param {UpdateApplicationRequest} application 
      * - `total_amount` *number* – The total amount 
      * - `status` *string* – The status of the new application: "Funded",
      *    "Lost", "PO Issued", "Prefunding Released", "Contract In",
@@ -132,11 +132,11 @@ export class LeaseQ implements LeaseQ.SDK {
      *    Widget" "Lead", or "New".
      * - `lost_reason` *string* - The reason if `status` is "Lost"
      * 
-     * @return {Promise<LeaseQ.UpdateApplicationResponse>}
+     * @return {Promise<UpdateApplicationResponse>}
      * 
      * @see https://github.com/leaseq/api-docs/blob/master/applications/patch.md 
      */
-    updateApplication: LeaseQ.UpdateApplication = async (app_id, application) =>
+    updateApplication: UpdateApplication = async (app_id, application) =>
         axios.patch(`/applications/${encodeURIComponent(app_id)}`, application, this.axios_config)
             .then(LeaseQ.toPromise)
 
@@ -144,12 +144,12 @@ export class LeaseQ implements LeaseQ.SDK {
      * Replace an application
      * 
      * @param {string} app_id 
-     * @param {LeaseQ.ReplaceApplicationRequest} application
-     * @return {Promise<LeaseQ.ReplaceApplicationResponse}
+     * @param {ReplaceApplicationRequest} application
+     * @return {Promise<ReplaceApplicationResponse}
      * 
      * @see https://github.com/leaseq/api-docs/blob/master/applications/put.md
      */
-    replaceApplication: LeaseQ.ReplaceApplication = async (app_id, application) =>
+    replaceApplication: ReplaceApplication = async (app_id, application) =>
         axios.put(`/applications/${encodeURIComponent(app_id)}`, application, this.axios_config)
             .then(LeaseQ.toPromise)
 
@@ -157,23 +157,23 @@ export class LeaseQ implements LeaseQ.SDK {
      * Electronically signs an application
      * 
      * @param {string} app_id
-     * @param {LeaseQ.SignApplicationRequest} signature
-     * @return {Promise<LeaseQ.SignApplicationResponse>}
+     * @param {SignApplicationRequest} signature
+     * @return {Promise<SignApplicationResponse>}
      * 
      * @see https://github.com/leaseq/api-docs/blob/master/applications/sign.md
      */
-    signApplication: LeaseQ.SignApplication = async (app_id, signature) =>
+    signApplication: SignApplication = async (app_id, signature) =>
         axios.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature, this.axios_config)
             .then(LeaseQ.toPromise)
 
     /**
      * Get estimated financing rates
      * 
-     * @return {Promise<Leaseq.GetRatesResponse>}
+     * @return {Promise<GetRatesResponse>}
      * 
      * @see https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
      */
-    getRates: LeaseQ.GetRates = async () =>
+    getRates: GetRates = async () =>
         axios.get(`/lenders/rates`, this.axios_config)
             .then(LeaseQ.toPromise)
 
@@ -181,11 +181,11 @@ export class LeaseQ implements LeaseQ.SDK {
      * Get quotes for an application
      * 
      * @param {string} app_id
-     * @return {Promise<LeaseQ.GetQuotesResponse>}
+     * @return {Promise<GetQuotesResponse>}
      * 
      * @see https://github.com/leaseq/api-docs/blob/master/applications/quotes/get.md
      */
-    getQuotes: LeaseQ.GetQuotes = async (app_id) =>
+    getQuotes: GetQuotes = async (app_id) =>
         axios.get(`/applications/${encodeURIComponent(app_id)}/quotes`, this.axios_config)
             .then(LeaseQ.toPromise)
 
@@ -193,12 +193,12 @@ export class LeaseQ implements LeaseQ.SDK {
      * Upload a document
      * 
      * @param {string} app_id
-     * @param {LeaseQ.UploadDocumentRequest} document
-     * @return {Promise<LeaseQ.UploadDocumentResponse>}
+     * @param {UploadDocumentRequest} document
+     * @return {Promise<UploadDocumentResponse>}
      * 
      * @see https://github.com/leaseq/api-docs/blob/master/applications/documents/post.md
      */
-    uploadDocument: LeaseQ.UploadDocument = async (app_id, document) =>
+    uploadDocument: UploadDocument = async (app_id, document) =>
         axios.post(`/applications/${encodeURIComponent(app_id)}/documents`, document, this.axios_config)
             .then(LeaseQ.toPromise)
 
