@@ -1,6 +1,4 @@
-// Tests the type definitions for LeaseQ's public API.
-// Project: https://github.com/leaseq/api-docs
-// Definitions by: Elijah Schow <https://github.com/elijah-schow>
+import LeaseQ from '../lib/index';
 
 // this isn't a real ssn
 export const ssn = 'hd17v6cWi2ltvwcLi6IDj4rhpkV+fafQOWg8yY756FwB46+POrecRj1dUg+xUcxW7lHtp0WKppB810+Ut++9uWNr6YJvzzemThrKykVw71qfq5ParS2p1YRCwGgfqJNb92V5KasrysMp+gM2kq6QdiSUWN9WhUP/6dkOnR+1CTCe68sS7zLI0JG394X196YN/ERasM5QhNSihQoOlsjw166wZMegviEb2EEm2zKp8A7jchL0ahJFsVO4aXmREIbCuE4jXY6OazWv7aF1BB5jvE7Hdw9SgXPMb/9+HTDOnLkIPqxEuxjZPR6bv6hImFBdeLa7J4xsPMJtghhla3GdndT7Okgn1/Qoq5Wjg1RzvFVp2rsYIMx9YVP74N69ga8f8e1PNd6T4V6coQRAP4U9IGb23BDAINxVbL5mae/LGDSsA6tdaT2pwGmJ90gyioutUSCNPR202zAKYY9280BKphp+GhERsSRKP+yBWCgc5EEJOKSqO/BcNbO3ckmfaNPOSHBnenjfaPogY0KM7jwVZIY5w+6itcOUrMpFLycxZLlqUWo6MOvn/CTsKWkm75uXv0dk/BPDgV1pj4ErMe1ifZyAN0SGF3n/9gSvqqI9IRRhELs5AMM/2AT+O8EDmRxvgO1XIwOu/gzeJ9pyQ1pkF06dlCpmlvTD6s6QZVNTa6s=';
@@ -31,7 +29,7 @@ export const post_login_response: LeaseQ.LoginResponse = {
  * POST /v1/applications
  * https://github.com/leaseq/api-docs/blob/master/applications/post.md
  */
-export const submit_full_application_request: LeaseQ.SubmitFullApplicationRequest = {
+export const submit_full_application_request: LeaseQ.SubmitApplicationRequest = {
     type: 'business',
     is_full_application: true,
     total_amount: 20733.89,
@@ -101,7 +99,7 @@ export const submit_full_application_request: LeaseQ.SubmitFullApplicationReques
     }]
 };
 
-export const submit_partial_application_request: LeaseQ.SubmitPartialApplicationRequest = {
+export const submit_partial_application_request: LeaseQ.SubmitApplicationRequest = {
     type: 'business',
     remote_id: 'c8014e1f-71d3-4a9c-b37b-8bddd7e9552c',
     guarantors: [
@@ -123,7 +121,7 @@ export const submit_application_response: LeaseQ.SubmitApplicationResponse = {
  * https://github.com/leaseq/api-docs/blob/master/applications/get.md
  */
 export const get_application_response: LeaseQ.GetApplicationResponse = {
-    app_id: 'GUID',
+    app_id: 'f1bc5b1c-2d8f-4c18-aa24-2136ad2b038c',
     status: 'AppIn',
     lender: 'Univest Capital, Inc.',
     updated_date: '2018-03-17T07:27:22.214Z',
@@ -141,14 +139,14 @@ export const update_application_request: LeaseQ.UpdateApplicationRequest = {
     total_amount: 40000,
 };
 
-export const update_application_response: LeaseQ.UpdateApplicationResponse = update_application_request;
-
 export const update_application_request_2: LeaseQ.UpdateApplicationRequest = {
     status: 'Lost',
     lost_reason: 'Lost To Cash',
 };
 
-export const update_application_response_2: LeaseQ.UpdateApplicationResponse = update_application_request_2;
+export const update_application_response: LeaseQ.UpdateApplicationResponse = {};
+
+export const update_application_response_2: LeaseQ.UpdateApplicationResponse = {};
 
 /**
  * Replace an application
