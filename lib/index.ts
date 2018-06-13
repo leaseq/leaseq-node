@@ -1,57 +1,43 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 
-export declare namespace LeaseQ {
+const http = axios;
 
-    //
-    // SDK
-    //
-    interface SDK {
-        login: Login;
-        submitApplication: SubmitApplication;
-        getApplication: GetApplication;
-        updateApplication: UpdateApplication;
-        replaceApplication: ReplaceApplication;
-        signApplication: SignApplication;
-        getRates: GetRates;
-        getQuotes: GetQuotes;
-        uploadDocument: UploadDocument;
-    }
+type UUID = string;
 
-    interface Config {
-        auth_token?: string;
-        /**
-         * Specify a base URL for api requests. Normally you shouldn't need to
-         * set this option unless you want to test against a specific
-         * environment.
-         */
-        baseURL?: string;
-    }
+const configuration: AxiosRequestConfig = {};
 
-    //
-    // API
-    //
+/**
+ * Convert an authentication token into an Authorization header
+ *
+ * @param {string} auth_token an authentication token. If you don't have
+ * one, get it from `login()`.
+ * @param {string} [auth_scheme] an authentication scheme (e.g. 'LeaseQ').
+ * 'LeaseQ' is the only supported scheme so far.  
+ * @return {string} an authorization header (e.g. "Authorization LeaseQ
+ * $Auth_Token")
+ */
+const toAuthorization = (auth_token?: string, auth_scheme = 'LeaseQ') =>
+    auth_token ? [auth_scheme, auth_token].join(' ') : undefined
 
-    /**
-     * Authenticate the user
-     * 
-     * POST /v1/login
-     * https://github.com/leaseq/api-docs/blob/master/login/post.md
-     */
+/**
+ * Convert axios response to regular promises
+ *
+ * @param {AxiosResponse} response
+ * @return {Promise} a promise that resolves to a plain response body
+ * without extra axios properties
+ */
+const toPromise = async (response: AxiosResponse) => Promise.resolve(response.data);
 
-    interface Login {
-        (credentials: LoginRequest): Promise<LoginResponse>;
-    }
+/**
+ * 
+ * Applications capture information about the Borrower and the Equipment to be financed.
+ * 
+ */
+export module Application {
 
-    interface LoginRequest {
-        email: string;
-        password: string;
-        tenant_id?: string;
-    }
-
-    interface LoginResponse {
-        auth_token: string;
-        auth_scheme: 'LeaseQ';
-        expires: string;
+    export function submit(application: submit.request): Promise<submit.response> {
+        return http.post(`/applications`, application, configuration)
+            .then(toPromise);
     }
 
     /**
@@ -60,37 +46,13 @@ export declare namespace LeaseQ {
      * POST /v1/applications
      * https://github.com/leaseq/api-docs/blob/master/applications/post.md
      */
-
-    interface SubmitApplication {
-        (application: SubmitApplicationRequest): Promise<SubmitApplicationResponse>;
-    }
-
-    type SubmitApplicationRequest = Application;
-
-    interface SubmitApplicationResponse {
-        app_id: UUID;
-        status: ApplicationStatus;
-        quotes?: Quote[];
-    }
-
-    /**
-     * Get a credit application
-     * 
-     * GET /v1/applications/{application_id}
-     * https://github.com/leaseq/api-docs/blob/master/applications/get.md
-     */
-
-    interface GetApplication {
-        (app_id: string): Promise<GetApplicationResponse>;
-    }
-
-    interface GetApplicationResponse {
-        app_id: UUID;
-        remote_id?: string;
-        status: ApplicationStatus;
-        lender?: string;
-        total_amount?: number;
-        updated_date?: string;
+    export module submit {
+        export type request = Application;
+        export type response = {
+            app_id: UUID;
+            status: Status;
+            quotes?: Quote[];
+        };
     }
 
     /**
@@ -99,18 +61,19 @@ export declare namespace LeaseQ {
      * PATCH /v1/applications/{application_id}
      * https://github.com/leaseq/api-docs/blob/master/applications/put.md
      */
-
-    interface UpdateApplication {
-        (app_id: string, application: UpdateApplicationRequest): Promise<UpdateApplicationResponse>;
+    export function update(app_id: UUID, application: update.request): Promise<update.response> {
+        return  http.patch(`/applications/${encodeURIComponent(app_id)}`, application, configuration)
+            .then(toPromise);    
     }
 
-    type UpdateApplicationRequest = {
-        status?: ApplicationStatus;
-        lost_reason?: string;
-        total_amount?: number;   
-    };
-
-    type UpdateApplicationResponse = {};
+    export module update {
+        export type request = {
+            status?: Status;
+            lost_reason?: string;
+            total_amount?: number;   
+        };
+        export type response = {};
+    }
 
     /**
      * Replace an application
@@ -118,17 +81,33 @@ export declare namespace LeaseQ {
      * PUT /v1/applications/{application_id}
      * https://github.com/leaseq/api-docs/blob/master/applications/put.md
      */
-
-    interface ReplaceApplication {
-        (app_id: string, application: ReplaceApplicationRequest): Promise<ReplaceApplicationResponse>;
+    export function replace(app_id: UUID, application: replace.request): Promise<replace.response> {
+        return http.put(`/applications/${encodeURIComponent(app_id)}`, application, configuration)
+            .then(toPromise)
+    }
+    
+    export module replace {
+        export type request = submit.request;
+        export type response = {
+            app_id: UUID;
+            status: Application.Status;   
+        };
     }
 
-    type ReplaceApplicationRequest = SubmitApplicationRequest;
+    /**
+     * Get a credit application
+     * 
+     * GET /v1/applications/{application_id}
+     * https://github.com/leaseq/api-docs/blob/master/applications/get.md
+     */
+    export function get(app_id: UUID): Promise<get.response> {
+        return http.get(`/applications/${encodeURIComponent(app_id)}`, configuration)
+            .then(toPromise);
+    }
 
-    type ReplaceApplicationResponse = {
-        app_id: UUID;
-        status: ApplicationStatus;   
-    };
+    export module get {
+        export type response = {};
+    }
 
     /**
      * Electronically signs an application
@@ -136,22 +115,29 @@ export declare namespace LeaseQ {
      * POST /v1/applications/{application_id}/sign
      * https://github.com/leaseq/api-docs/blob/master/applications/sign.md
      */
-
-    interface SignApplication {
-        (app_id: string, signature: SignApplicationRequest): Promise<SignApplicationResponse>;
+    export function sign(app_id: UUID, signature: sign.request): Promise<sign.response> {
+        return http.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature, configuration)
+            .then(toPromise);
+    }
+    
+    export module sign {
+        export type request = {
+            selected_quote: string;
+            selected_term: number;
+            name: string;
+            consent: string;
+            title?: string;
+        };
+        export type response = {
+            signature: string;
+            date: string;
+        };
     }
 
-    interface SignApplicationRequest {
-        selected_quote: string;
-        selected_term: number;
-        name: string;
-        consent: string;
-        title?: string;
-    }
-
-    interface SignApplicationResponse {
-        signature: string;
-        date: string;
+    // TODO: request params for downpayment slider
+    export function quotes(app_id: UUID): Promise<quotes.response> {
+        return http.get(`/applications/${encodeURIComponent(app_id)}/quotes`, configuration)
+            .then(toPromise);
     }
 
     /**
@@ -160,166 +146,42 @@ export declare namespace LeaseQ {
      * GET /v1/applications/{application_id}/quotes
      * https://github.com/leaseq/api-docs/blob/master/applications/quotes/get.md
      */
-    interface GetQuotes {
-        (app_id: string): Promise<GetQuotesResponse>;
-    }
-
-    interface GetQuotesResponse {
-        quotes: Quote[];
+    export module quotes {
+        export type response = {
+            quotes: Quote[];
+        };
     }
 
     /**
-     * Upload document
+     * Upload a document to an application
      * 
      * POST /v1/applications/{application_id}/documents
      * https://github.com/leaseq/api-docs/blob/master/applications/documents/post.md
      */
-
-    interface UploadDocument {
-        (app_id: string, document: UploadDocumentRequest): Promise<UploadDocumentResponse>;
+    export function upload(app_id: UUID, document: upload.request): Promise<upload.response> {
+        return http.post(`/applications/${encodeURIComponent(app_id)}/documents`, document, configuration)
+            .then(toPromise);    
     }
 
-    interface UploadDocumentRequest {
-        name: string;
-        data: string;
-        type?: "invoice" | "quote" | "contract";
-    }
-
-    interface UploadDocumentResponse {
-        document_id: string;
-    }
-
-    /**
-     * Get estimated financing rates
-     * 
-     * GET /v1/lenders/rates
-     * https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
-     */
-
-    interface GetRates {
-        (): Promise<GetRatesResponse>;
-    }
-
-    interface GetRatesResponse {
-        credit_tiers: {
-            credit_tier: 'A'
-                | 'B'
-                | 'C'
-                | 'D';
-            terms: {
-                term_length: number;
-                rates: {
-                    amount_min: number;
-                    amount_max: number;
-                    rate: number;
-                    factor: number;
-                }[]
-            }[];
-        }[]
-    }
-    
-    //
-    // Miscellaneous
-    //
-    interface Product {
-        product_code?: string;
-        name?: string;
-        quantity?: number;
-        price?: number;
-
-        type?: EquipmentVerticals;
-        description?: string;
-        condition?: 'new' | 'used';
-
-        vehicle_type?: VehicleType;
-        vehicle_make?: string;
-        vehicle_model?: string;
-        vehicle_link?: string;
-        vehicle_year?: number;
-        vehicle_milage?: number;
-    }
-
-    interface Charge {
-        charge: string;
-        description?: string;
-        price: number;
-    }
-
-    interface Company {
-        name: string;
-        dba?: string;
-        phone: string;
-        address: string;
-        city: string;
-        state: string;
-        zip: string;
-        ein: string;
-        years_in_business: number;
-        structure: CompanyStructure;
-    }
-
-    interface Guarantor {
-        first_name: string,
-        last_name: string,
-        ssn: string;
-        email?: string,
-        phone?: string,
-        address?: string;
-        city?: string;
-        state?: string;
-        zip?: string;
-        percentage_owned?: string;
-        
-        // truck fields
-        years_at_current_address?: number;
-        haul_source?: string;
-        has_industry_experience?: boolean;
-        years_of_experience?: number;
-        experience_description?: string;
-        has_cdl?: boolean;
-        years_with_cdl?: number;
-        has_other_vehicles?: boolean;
-        number_of_vehicle?: number;
-        number_of_trailers?: number;
-        has_finanaced_before?: boolean;
-    }
-
-    interface Quote {
-        quote_id: string;
-        lender_name?: string;
-        lender: {
+    export module upload {
+        export type request = {
             name: string;
-            about: string;
-            phone: string;
-            logo: string;
+            data: string;
+            type?: Type;
         };
-        finance_type?: string;
-        details?: string;
-        options: Option[];
+        export type response = {
+            document_id: string;
+        };
+        export type Type = "invoice" | "quote" | "contract";
     }
 
-    interface Option {
-        term: number;
-        monthly_payment: number;
-    }
-
-    type Address = {
-        address: string; // aka "street"
-        city: string;
-        state: string;
-        country: string;
-        zip: string; // aka "postalCode"
-    }
-
-    type UUID = string;
-
-    type ApplicationType = "business"
+    export type Type = "business"
         | "consumer"
         | "corporate"
         | "nonprofit"
         | "municipal";
 
-    type ApplicationStatus = "New"
+    export type Status = "New"
         | "WigLead"
         | "Lead"
         | "AppIn"
@@ -333,7 +195,7 @@ export declare namespace LeaseQ {
         | "Lost"
         | "Funded";
 
-    type EquipmentVerticals = "audio visual"
+    export type EquipmentVerticals = "audio visual"
         | "automotive"
         | "controls"
         | "coffee"
@@ -368,250 +230,190 @@ export declare namespace LeaseQ {
         | "veterinary"
         | "other";
 
-    type CompanyStructure = "sole_prop"
+    export type CompanyStructure = "sole_prop"
         | "llc"
         | "partnership"
         | "c_corp"
         | "s_corp";
 
-    type VehicleType = 'longhaul'
+    export type VehicleType = 'longhaul'
         | 'shorthaul'
         | 'utility'
         | 'glider'
         | 'livery';
 
-    type Application = {
-        type: ApplicationType;
-        status?: ApplicationStatus;
-        total_amount?: number;
-        remote_id?: string;
-        
-        company?: Company;
-        products?: Product[];
-        billing?: Charge[];
-        quotes?: Quote[];
+    export type Product = {
+        product_code?: string;
+        name?: string;
+        quantity?: number;
+        price?: number;
 
-        /* WARNING: Do not put guarantors here. It will cause type errors that
-        don't match the API docs. */
-        
-        // hvac fields
-        owns_install_location?: boolean;
+        type?: EquipmentVerticals;
+        description?: string;
+        condition?: Product.Condition;
 
+        vehicle_type?: VehicleType;
+        vehicle_make?: string;
+        vehicle_model?: string;
+        vehicle_link?: string;
+        vehicle_year?: number;
+        vehicle_milage?: number;
+    }
+
+    export module Product {
+        export type Condition = 'new' | 'used';
+    }
+
+    export type Charge = {
+        charge: string;
+        description?: string;
+        price: number;
+    }
+
+    export type Company = {
+        name: string;
+        dba?: string;
+        phone: string;
+        address: string;
+        city: string;
+        state: string;
+        zip: string;
+        ein: string;
+        years_in_business: number;
+        structure: CompanyStructure;
+    }
+
+    export type Guarantor = {
+        first_name: string,
+        last_name: string,
+        ssn: string;
+        email?: string,
+        phone?: string,
+        address?: string;
+        city?: string;
+        state?: string;
+        zip?: string;
+        percentage_owned?: string;
+        
         // truck fields
-        downpayment?: number;
+        years_at_current_address?: number;
+        haul_source?: string;
+        has_industry_experience?: boolean;
+        years_of_experience?: number;
+        experience_description?: string;
+        has_cdl?: boolean;
+        years_with_cdl?: number;
+        has_other_vehicles?: boolean;
+        number_of_vehicle?: number;
+        number_of_trailers?: number;
+        has_finanaced_before?: boolean;
+    }
 
-    } & ({
-        is_full_application: true;
-        guarantors?: Guarantor[];
-    } | {
-        is_full_application?: false;
-        guarantors: Array<Partial<Guarantor> & { email: string }>;
-    });
+    export type Quote = {
+        quote_id: string;
+        lender_name?: string;
+        lender: {
+            name: string;
+            about: string;
+            phone: string;
+            logo: string;
+        };
+        finance_type?: string;
+        details?: string;
+        options: Option[];
+    }
+
+    interface Option {
+        term: number;
+        monthly_payment: number;
+    }    
+
 }
 
-export class LeaseQ implements LeaseQ.SDK {
+export type Application = {
+    type: Application.Type;
+    status?: Application.Status;
+    total_amount?: number;
+    remote_id?: string;
+    
+    company?: Application.Company;
+    products?: Application.Product[];
+    billing?: Application.Charge[];
+    quotes?: Application.Quote[];
 
-    private readonly axios_config: AxiosRequestConfig;
+    /* WARNING: Do not put guarantors here. It will cause type errors that
+    don't match the API docs. */
+    
+    // hvac fields
+    owns_install_location?: boolean;
 
-    /**
-     * @param {LeaseQ.Config} config 
-     */
-    constructor(config?: LeaseQ.Config) {
+    // truck fields
+    downpayment?: number;
 
-        const default_base_url = `https://dashboard-dev.leaseq.com/api`;
+} & ({
+    is_full_application: true;
+    guarantors?: Application.Guarantor[];
+} | {
+    is_full_application?: false;
+    guarantors: Array<Partial<Application.Guarantor> & { email: string }>;
+});
 
-        this.axios_config = {
-            headers: {}
-        };
+/**
+ * 
+ * The following are APIs related to Lenders.
+ * 
+ */
 
-        /* I would love to just set axios (custom instance
-           defaults)[https://github.com/axios/axios#custom-instance-defaults],
-           but that feature doesn't seem to work properly. For now we have to
-           work around this by keeping track of our own config.
-           
-           WARNING: axios will fail if `Authorization` is `undefined`. The key
-           either needs to have a value, or not exist at all. */
-        if (config) {
-            if(config.auth_token){
-                this.axios_config.headers.Authorization = LeaseQ.toAuthorization(config.auth_token);
-            }
-            
-            this.axios_config.baseURL = config.baseURL || default_base_url;
-        } else {
-            this.axios_config.baseURL = default_base_url;
-        }
+export module Lender {
 
-    }
-
-    /**
-     * Convert an authentication token into an Authorization header
-     *
-     * @param {string} auth_token an authentication token. If you don't have
-     * one, get it from `login()`.
-     * @param {string} [auth_scheme] an authentication scheme (e.g. 'LeaseQ').
-     * 'LeaseQ' is the only supported scheme so far.  
-     * @return {string} an authorization header (e.g. "Authorization LeaseQ
-     * $Auth_Token")
-     */
-    static readonly toAuthorization = (auth_token?: string, auth_scheme = 'LeaseQ') =>
-        auth_token ? [auth_scheme, auth_token].join(' ') : undefined
-
-    /**
-     * Convert axios response to regular promises
-     *
-     * @param {AxiosResponse} response
-     * @return {Promise} a promise that resolves to a plain response body
-     * without extra axios properties
-     */
-    private static readonly toPromise = async (response: AxiosResponse) => Promise.resolve(response.data);
-
-    /**
-     * Authenticate the user.
-     *
-     * @param {LeaseQ.LoginRequest} credentials
-     *  - `email` *string* – Your email address
-     *  - `password` *string* – Your password
-     *  - `tenant_id` *string* – Your tenant or dealer ID
-     *
-     * @return {Promise<LeaseQ.LoginResponse>}
-     *  - `auth_token` *string* – The authentication token
-     *  - `auth_scheme` *string* – The authentication scheme
-     *  - `expires` *string* – The expiration date/time of the token
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/login/post.md
-     */
-    login: LeaseQ.Login = async (credentials) =>
-        axios.post<LeaseQ.LoginResponse>(`/login`, credentials, this.axios_config)
-            .then(LeaseQ.toPromise)
-            .then(async response => {
-                this.axios_config.headers.Authorization = LeaseQ.toAuthorization(response.auth_token);
-                return Promise.resolve(response);
-            })
-
-    /**
-     * Create a new credit application
-     *
-     * @param {LeaseQ.ApplyRequest} application
-     *  - `type` *string* – The application type: "business", "consumer",
-     *    "corporate", "nonprofit", or "municipal".
-     *  - `total_amount` *number* – The total amount 
-     *  - `remote_id` *string* – An optional identifier that can be set to correlate
-     *    LeaseQ applications with entities in other systems. This field is
-     *    searchable in the LeaseQ dashboard
-     *  - `products` *LeaseQ.Product[]* – An array of products. See the definition of *LeaseQ.Product*.
-     *  - `equipment` *LeaseQ.Equipment* – Equipment information. See the definition of *LeaseQ.Equipment*.
-     *  - `billing` *LeaseQ.Charge[]* – An array of line items. See the definition of *LeaseQ.Charge*.
-     *  - `company` *LeaseQ.Company* – Company information. See the definition of *LeaseQ.Company*.
-     *  - `guarantors` *LeaseQ.Guarantor[]* – An array of guarantors. See the definition of *LeaseQ.Guarantor*.
-     *
-     * @return {Promise<LeaseQ.ApplyResponse>}
-     *  - `app_id` *string* – The ID of the new application
-     *  - `status` *string* – The status of the new application: "Funded",
-     *    "Lost", "PO Issued", "Prefunding Released", "Contract In",
-     *    "Contract Out", "Approved", "App Submitted", "Decline", "App
-     *    Widget" "Lead", or "New".
-     *
-     * @see https://github.com/leaseq/api-docs/blob/master/login/post.md
-     */
-    submitApplication: LeaseQ.SubmitApplication = async (application) => {
-        return axios.post(`/applications`, application, this.axios_config)
-            .then(LeaseQ.toPromise);
-    }
-
-    /**
-     * Get a credit application
-     * 
-     * @param {string} app_id
-     * @return {Promise<LeaseQ.GetApplicationResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/get.md
-     */
-    getApplication: LeaseQ.GetApplication = async (app_id) =>
-        axios.get(`/applications/${encodeURIComponent(app_id)}`, this.axios_config)
-            .then(LeaseQ.toPromise)
-
-    /**
-     * Update an application
-     * 
-     * @param {string} app_id 
-     * @param {LeaseQ.UpdateApplicationRequest} application 
-     * - `total_amount` *number* – The total amount 
-     * - `status` *string* – The status of the new application: "Funded",
-     *    "Lost", "PO Issued", "Prefunding Released", "Contract In",
-     *    "Contract Out", "Approved", "App Submitted", "Decline", "App
-     *    Widget" "Lead", or "New".
-     * - `lost_reason` *string* - The reason if `status` is "Lost"
-     * 
-     * @return {Promise<LeaseQ.UpdateApplicationResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/patch.md 
-     */
-    updateApplication: LeaseQ.UpdateApplication = async (app_id, application) =>
-        axios.patch(`/applications/${encodeURIComponent(app_id)}`, application, this.axios_config)
-            .then(LeaseQ.toPromise)
-
-    /**
-     * Replace an application
-     * 
-     * @param {string} app_id 
-     * @param {LeaseQ.ReplaceApplicationRequest} application
-     * @return {Promise<LeaseQ.ReplaceApplicationResponse}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/put.md
-     */
-    replaceApplication: LeaseQ.ReplaceApplication = async (app_id, application) =>
-        axios.put(`/applications/${encodeURIComponent(app_id)}`, application, this.axios_config)
-            .then(LeaseQ.toPromise)
-
-    /**
-     * Electronically signs an application
-     * 
-     * @param {string} app_id
-     * @param {LeaseQ.SignApplicationRequest} signature
-     * @return {Promise<LeaseQ.SignApplicationResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/sign.md
-     */
-    signApplication: LeaseQ.SignApplication = async (app_id, signature) =>
-        axios.post(`/applications/${encodeURIComponent(app_id)}/sign`, signature, this.axios_config)
-            .then(LeaseQ.toPromise)
-
-    /**
+     /**
      * Get estimated financing rates
      * 
-     * @return {Promise<Leaseq.GetRatesResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
+     * GET /v1/lenders/rates
+     * https://github.com/leaseq/api-docs/blob/master/lenders/rates/get.md
      */
-    getRates: LeaseQ.GetRates = async () =>
-        axios.get(`/lenders/rates`, this.axios_config)
-            .then(LeaseQ.toPromise)
+    export function rates(): Promise<rates.response> {
+        return http.get(`/lenders/rates`, configuration)
+            .then(toPromise);
+    }
 
-    /**
-     * Get quotes for an application
-     * 
-     * @param {string} app_id
-     * @return {Promise<LeaseQ.GetQuotesResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/quotes/get.md
-     */
-    getQuotes: LeaseQ.GetQuotes = async (app_id) =>
-        axios.get(`/applications/${encodeURIComponent(app_id)}/quotes`, this.axios_config)
-            .then(LeaseQ.toPromise)
+    export module rates {
+        export type response = {
+            credit_tiers: {
+                credit_tier: CreditTier;
+                terms: {
+                    term_length: number;
+                    rates: {
+                        amount_min: number;
+                        amount_max: number;
+                        rate: number;
+                        factor: number;
+                    }[]
+                }[];
+            }[]
+        };
+    }
 
-    /**
-     * Upload a document
-     * 
-     * @param {string} app_id
-     * @param {LeaseQ.UploadDocumentRequest} document
-     * @return {Promise<LeaseQ.UploadDocumentResponse>}
-     * 
-     * @see https://github.com/leaseq/api-docs/blob/master/applications/documents/post.md
-     */
-    uploadDocument: LeaseQ.UploadDocument = async (app_id, document) =>
-        axios.post(`/applications/${encodeURIComponent(app_id)}/documents`, document, this.axios_config)
-            .then(LeaseQ.toPromise)
+    export type CreditTier = 'A' | 'B' | 'C' | 'D';
 
 }
 
-export default LeaseQ;
+/**
+ * Authenticate the user
+ * 
+ * POST /v1/login
+ * https://github.com/leaseq/api-docs/blob/master/login/post.md
+ */
+export function login(credentials: login.request): Promise<login.response> {
+    return http.post<login.response>(`/login`, credentials, configuration)
+        .then(toPromise)
+        .then(async response => {
+            configuration.headers.Authorization = toAuthorization(response.auth_token);
+            return Promise.resolve(response);
+        });
+}
+
+export module login {
+    export type request = {};
+    export type response = {};
+}
