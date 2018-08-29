@@ -1,6 +1,6 @@
 {
   "name": "leaseq-node",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Submit credit applications to LeaseQ",
   "main": "build/index.js",
   "types": "build/index.d.ts",
