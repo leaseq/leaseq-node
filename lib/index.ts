@@ -142,10 +142,10 @@ export declare namespace LeaseQ {
     }
 
     interface SignApplicationRequest {
-        selected_quote: string;
-        selected_term: number;
-        name: string;
-        consent: string;
+        selected_quote?: string;
+        selected_term?: number;
+        name?: string;
+        consent?: string;
         title?: string;
     }
 
@@ -269,19 +269,15 @@ export declare namespace LeaseQ {
         state?: string;
         zip?: string;
         percentage_owned?: string;
-        
-        // truck fields
-        years_at_current_address?: number;
-        haul_source?: string;
-        has_industry_experience?: boolean;
-        years_of_experience?: number;
-        experience_description?: string;
-        has_cdl?: boolean;
-        years_with_cdl?: number;
-        has_other_vehicles?: boolean;
-        number_of_vehicle?: number;
-        number_of_trailers?: number;
-        has_finanaced_before?: boolean;
+
+        dob_month?: string;
+        dob_day?: string;
+        dob_year?: string;
+        cell_phone?: string;
+        work_phone?: string;
+        drivers_license_no?: string;
+        drivers_license_state?: string;
+        homeowner?: boolean;
     }
 
     interface Quote {
@@ -385,20 +381,26 @@ export declare namespace LeaseQ {
         status?: ApplicationStatus;
         total_amount?: number;
         remote_id?: string;
-        
+
         company?: Company;
         products?: Product[];
         billing?: Charge[];
         quotes?: Quote[];
 
+        clicklease_details?: {
+            business_startdate_month?: string;
+            business_startdate_day?: string;
+            business_startdate_year?: string;
+            state_of_incorp?: string;
+            industry_code?: number;
+        }
+
         /* WARNING: Do not put guarantors here. It will cause type errors that
         don't match the API docs. */
-        
+
         // hvac fields
         owns_install_location?: boolean;
 
-        // truck fields
-        downpayment?: number;
 
     } & ({
         is_full_application: true;
